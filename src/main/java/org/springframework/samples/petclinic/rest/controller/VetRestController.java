@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -75,7 +76,7 @@ public class VetRestController implements VetsApi {
 
     @PreAuthorize("hasRole(@roles.VET_ADMIN)")
     @Override
-    public ResponseEntity<VetDto> addVet(VetDto vetDto) {
+    public ResponseEntity<VetDto> addVet(@Valid VetDto vetDto) {
         HttpHeaders headers = new HttpHeaders();
         Vet vet = vetMapper.toVet(vetDto);
         if(vet.getNrOfSpecialties() > 0){
@@ -89,7 +90,7 @@ public class VetRestController implements VetsApi {
 
     @PreAuthorize("hasRole(@roles.VET_ADMIN)")
     @Override
-    public ResponseEntity<VetDto> updateVet(Integer vetId,VetDto vetDto)  {
+    public ResponseEntity<VetDto> updateVet(Integer vetId, @Valid VetDto vetDto)  {
         Vet currentVet = this.clinicService.findVetById(vetId);
         if (currentVet == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

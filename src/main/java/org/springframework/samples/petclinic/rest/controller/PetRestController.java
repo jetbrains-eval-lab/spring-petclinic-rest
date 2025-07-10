@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +73,7 @@ public class PetRestController implements PetsApi {
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
-    public ResponseEntity<PetDto> updatePet(Integer petId, PetDto petDto) {
+    public ResponseEntity<PetDto> updatePet(Integer petId, @Valid PetDto petDto) {
         Pet currentPet = this.clinicService.findPetById(petId);
         if (currentPet == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

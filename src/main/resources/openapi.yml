@@ -2151,6 +2151,7 @@ components:
             $ref: '#/components/schemas/Role'
       required:
         - username
+        - password
     Role:
       title: Role
       description: A role.

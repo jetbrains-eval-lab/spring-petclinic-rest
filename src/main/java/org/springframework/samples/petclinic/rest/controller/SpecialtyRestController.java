@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,7 +74,7 @@ public class SpecialtyRestController implements SpecialtiesApi {
 
     @PreAuthorize("hasRole(@roles.VET_ADMIN)")
     @Override
-    public ResponseEntity<SpecialtyDto> addSpecialty(SpecialtyDto specialtyDto) {
+    public ResponseEntity<SpecialtyDto> addSpecialty(@Valid SpecialtyDto specialtyDto) {
         HttpHeaders headers = new HttpHeaders();
         Specialty specialty = specialtyMapper.toSpecialty(specialtyDto);
         this.clinicService.saveSpecialty(specialty);
@@ -83,7 +84,7 @@ public class SpecialtyRestController implements SpecialtiesApi {
 
     @PreAuthorize("hasRole(@roles.VET_ADMIN)")
     @Override
-    public ResponseEntity<SpecialtyDto> updateSpecialty(Integer specialtyId, SpecialtyDto specialtyDto) {
+    public ResponseEntity<SpecialtyDto> updateSpecialty(Integer specialtyId, @Valid SpecialtyDto specialtyDto) {
         Specialty currentSpecialty = this.clinicService.findSpecialtyById(specialtyId);
         if (currentSpecialty == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +71,7 @@ public class PetTypeRestController implements PettypesApi {
 
     @PreAuthorize("hasRole(@roles.VET_ADMIN)")
     @Override
-    public ResponseEntity<PetTypeDto> addPetType(PetTypeFieldsDto petTypeFieldsDto) {
+    public ResponseEntity<PetTypeDto> addPetType(@Valid PetTypeFieldsDto petTypeFieldsDto) {
         HttpHeaders headers = new HttpHeaders();
         final PetType type = petTypeMapper.toPetType(petTypeFieldsDto);
         this.clinicService.savePetType(type);
@@ -80,7 +81,7 @@ public class PetTypeRestController implements PettypesApi {
 
     @PreAuthorize("hasRole(@roles.VET_ADMIN)")
     @Override
-    public ResponseEntity<PetTypeDto> updatePetType(Integer petTypeId, PetTypeDto petTypeDto) {
+    public ResponseEntity<PetTypeDto> updatePetType(Integer petTypeId, @Valid PetTypeDto petTypeDto) {
         PetType currentPetType = this.clinicService.findPetTypeById(petTypeId);
         if (currentPetType == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

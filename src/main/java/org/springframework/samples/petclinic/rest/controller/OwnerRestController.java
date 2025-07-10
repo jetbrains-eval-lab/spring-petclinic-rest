@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 import java.util.Collection;
 import java.util.List;
@@ -93,7 +94,7 @@ public class OwnerRestController implements OwnersApi {
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
-    public ResponseEntity<OwnerDto> addOwner(OwnerFieldsDto ownerFieldsDto) {
+    public ResponseEntity<OwnerDto> addOwner(@Valid OwnerFieldsDto ownerFieldsDto) {
         HttpHeaders headers = new HttpHeaders();
         Owner owner = ownerMapper.toOwner(ownerFieldsDto);
         this.clinicService.saveOwner(owner);
@@ -105,7 +106,7 @@ public class OwnerRestController implements OwnersApi {
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
-    public ResponseEntity<OwnerDto> updateOwner(Integer ownerId, OwnerFieldsDto ownerFieldsDto) {
+    public ResponseEntity<OwnerDto> updateOwner(Integer ownerId, @Valid OwnerFieldsDto ownerFieldsDto) {
         Owner currentOwner = this.clinicService.findOwnerById(ownerId);
         if (currentOwner == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -133,7 +134,7 @@ public class OwnerRestController implements OwnersApi {
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
-    public ResponseEntity<PetDto> addPetToOwner(Integer ownerId, PetFieldsDto petFieldsDto) {
+    public ResponseEntity<PetDto> addPetToOwner(Integer ownerId, @Valid PetFieldsDto petFieldsDto) {
         HttpHeaders headers = new HttpHeaders();
         Pet pet = petMapper.toPet(petFieldsDto);
         Owner owner = new Owner();
@@ -149,7 +150,7 @@ public class OwnerRestController implements OwnersApi {
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
-    public ResponseEntity<Void> updateOwnersPet(Integer ownerId, Integer petId, PetFieldsDto petFieldsDto) {
+    public ResponseEntity<Void> updateOwnersPet(Integer ownerId, Integer petId, @Valid PetFieldsDto petFieldsDto) {
         Owner currentOwner = this.clinicService.findOwnerById(ownerId);
         if (currentOwner != null) {
             Pet currentPet = this.clinicService.findPetById(petId);
@@ -166,7 +167,7 @@ public class OwnerRestController implements OwnersApi {
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
-    public ResponseEntity<VisitDto> addVisitToOwner(Integer ownerId, Integer petId, VisitFieldsDto visitFieldsDto) {
+    public ResponseEntity<VisitDto> addVisitToOwner(Integer ownerId, Integer petId, @Valid VisitFieldsDto visitFieldsDto) {
         HttpHeaders headers = new HttpHeaders();
         Visit visit = visitMapper.toVisit(visitFieldsDto);
         Pet pet = new Pet();

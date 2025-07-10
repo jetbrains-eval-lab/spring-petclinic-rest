@@ -48,7 +48,7 @@ public class UserRestController implements UsersApi {
 
     @PreAuthorize( "hasRole(@roles.ADMIN)" )
     @Override
-    public ResponseEntity<UserDto> addUser(UserDto userDto) {
+    public ResponseEntity<UserDto> addUser(@Valid UserDto userDto) {
         HttpHeaders headers = new HttpHeaders();
         User user = userMapper.toUser(userDto);
         this.userService.saveUser(user);
