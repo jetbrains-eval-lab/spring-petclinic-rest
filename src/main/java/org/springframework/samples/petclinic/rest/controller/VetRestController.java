@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(exposedHeaders = "errors, content-type")
-@RequestMapping("api")
+@RequestMapping("api/v1")
 public class VetRestController implements VetsApi {
 
     private final ClinicService clinicService;
@@ -83,7 +83,7 @@ public class VetRestController implements VetsApi {
             vet.setSpecialties(vetSpecialities);
         }
         this.clinicService.saveVet(vet);
-        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/vets/{id}").buildAndExpand(vet.getId()).toUri());
+        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/v1/vets/{id}").buildAndExpand(vet.getId()).toUri());
         return new ResponseEntity<>(vetMapper.toVetDto(vet), headers, HttpStatus.CREATED);
     }
 
