@@ -18,6 +18,8 @@ package org.springframework.samples.petclinic.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.samples.petclinic.model.*;
 import org.springframework.samples.petclinic.repository.*;
@@ -66,6 +68,12 @@ public class ClinicServiceImpl implements ClinicService {
     @Transactional(readOnly = true)
     public Collection<Pet> findAllPets() throws DataAccessException {
         return petRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Pet> findAllPets(Pageable pageable) throws DataAccessException {
+        return petRepository.findAll(pageable);
     }
 
     @Override

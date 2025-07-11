@@ -53,7 +53,7 @@ public class VisitRestController implements VisitsApi {
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
-    public ResponseEntity<List<VisitDto>> listVisits() {
+    public ResponseEntity<List<VisitDto>> listVisits(Integer page, Integer size, List<String> sort) {
         List<Visit> visits = new ArrayList<>(this.clinicService.findAllVisits());
         if (visits.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
