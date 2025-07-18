@@ -10,8 +10,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.samples.petclinic.validation.UniqueEnabledUsername;
 
 @Entity
 @Table(name = "users")
@@ -19,9 +21,12 @@ public class User {
 
     @Id
     @Column(name = "username")
+    @NotEmpty
+    @UniqueEnabledUsername
     private String username;
 
     @Column(name = "password")
+    @NotEmpty
     private String password;
 
     @Column(name = "enabled")

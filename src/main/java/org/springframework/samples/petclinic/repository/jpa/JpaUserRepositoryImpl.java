@@ -24,4 +24,12 @@ public class JpaUserRepositoryImpl implements UserRepository {
             this.em.merge(user);
         }
     }
+
+    @Override
+    public User findEnabledUserByUsername(String username) throws DataAccessException {
+        return this.em.createQuery("SELECT u FROM User u WHERE u.username = :username AND u.enabled = :enabled", User.class)
+            .setParameter("username", username)
+            .setParameter("enabled", true)
+            .getSingleResult();
+    }
 }
