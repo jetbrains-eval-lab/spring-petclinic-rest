@@ -49,6 +49,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.hasSize;
 
 
 /**
@@ -216,6 +217,69 @@ class PetRestControllerTests {
         given(this.clinicService.findPetById(999)).willReturn(null);
         this.mockMvc.perform(delete("/api/pets/999")
                 .content(newPetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "OWNER_ADMIN")
+    void testGetPetsWithPaginationSuccess() throws Exception {
+        final Collection<Pet> pets = petMapper.toPets(this.pets);
+        when(this.clinicService.findAllPets()).thenReturn(pets);
+
+        this.mockMvc.perform(get("/api/pets/pages")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json"))
+            .andExpect(jsonPath("$.content", hasSize(2)))
+            .andExpect(jsonPath("$.content[0].id").value(3))
+            .andExpect(jsonPath("$.content[0].name").value("Rosy"))
+            .andExpect(jsonPath("$.content[1].id").value(4))
+            .andExpect(jsonPath("$.content[1].name").value("Jewel"))
+            .andExpect(jsonPath("$.totalElements").value(2))
+            .andExpect(jsonPath("$.totalPages").value(1))
+            .andExpect(jsonPath("$.size").value(20))
+            .andExpect(jsonPath("$.number").value(0));
+    }
+
+    @Test
+    @WithMockUser(roles = "OWNER_ADMIN")
+    void testGetPetsWithPaginationAndCustomParameters() throws Exception {
+        // Create more pets for testing pagination
+        PetTypeDto petType = new PetTypeDto();
+        petType.id(2).name("dog");
+
+        for (int i = 5; i <= 10; i++) {
+            PetDto pet = new PetDto();
+            pets.add(pet.id(i)
+                .name("Pet" + i)
+                .birthDate(LocalDate.now())
+                .type(petType));
+        }
+
+        final Collection<Pet> allPets = petMapper.toPets(this.pets);
+        when(this.clinicService.findAllPets()).thenReturn(allPets);
+
+        // Test with page=1, size=3
+        this.mockMvc.perform(get("/api/pets/pages")
+                .param("page", "1")
+                .param("size", "3")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json"))
+            .andExpect(jsonPath("$.content", hasSize(3)))
+            .andExpect(jsonPath("$.totalElements").value(8))
+            .andExpect(jsonPath("$.totalPages").value(3))
+            .andExpect(jsonPath("$.size").value(3))
+            .andExpect(jsonPath("$.number").value(1));
+    }
+
+    @Test
+    @WithMockUser(roles = "OWNER_ADMIN")
+    void testGetPetsWithPaginationNotFound() throws Exception {
+        pets.clear();
+        given(this.clinicService.findAllPets()).willReturn(petMapper.toPets(pets));
+        this.mockMvc.perform(get("/api/pets/pages")
+                .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
     }
 
