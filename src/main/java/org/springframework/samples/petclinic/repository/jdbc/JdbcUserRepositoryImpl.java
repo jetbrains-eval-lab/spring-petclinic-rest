@@ -46,8 +46,16 @@ public class JdbcUserRepositoryImpl implements UserRepository {
         }
     }
 
-    private User getByUsername(String username) {
+    @Override
+    public User findEnabledUserByUsername(String username) throws DataAccessException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("username", username);
+        params.put("enabled", true);
+        return this.namedParameterJdbcTemplate.queryForObject("SELECT * FROM users WHERE username=:username and enabled=:enabled",
+            params, BeanPropertyRowMapper.newInstance(User.class));
+    }
 
+    private User getByUsername(String username) {
         Map<String, Object> params = new HashMap<>();
         params.put("username", username);
         return this.namedParameterJdbcTemplate.queryForObject("SELECT * FROM users WHERE username=:username",
