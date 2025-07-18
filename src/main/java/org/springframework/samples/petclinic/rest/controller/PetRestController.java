@@ -16,10 +16,6 @@
 
 package org.springframework.samples.petclinic.rest.controller;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.PetMapper;
@@ -34,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Vitaliy Fedoriv
@@ -66,48 +61,8 @@ public class PetRestController implements PetsApi {
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
-    public ResponseEntity<List<PetDto>> listPets(Integer page, Integer size, List<String> sort) {
-        // Create Pageable object from the parameters
-        Pageable pageable;
-        if (sort != null && !sort.isEmpty()) {
-            // Parse sort parameters
-            System.out.println("[DEBUG_LOG] Sort parameters: " + sort);
-
-            // Create a list to hold the sort orders
-            List<Sort.Order> orders = new ArrayList<>();
-
-            // Check if we have a single parameter with comma (e.g., "name,desc")
-            if (sort.size() == 1 && sort.get(0).contains(",")) {
-                String sortParam = sort.get(0);
-                String[] parts = sortParam.split(",");
-                String property = parts[0];
-                Sort.Direction direction = (parts.length > 1 && parts[1].equalsIgnoreCase("desc"))
-                    ? Sort.Direction.DESC : Sort.Direction.ASC;
-                System.out.println("[DEBUG_LOG] Sort property: " + property + ", direction: " + direction);
-                orders.add(new Sort.Order(direction, property));
-            } else {
-                // Process multiple sort parameters
-                for (String sortParam : sort) {
-                    String[] parts = sortParam.split(",");
-                    String property = parts[0];
-                    Sort.Direction direction = (parts.length > 1 && parts[1].equalsIgnoreCase("desc"))
-                        ? Sort.Direction.DESC : Sort.Direction.ASC;
-                    System.out.println("[DEBUG_LOG] Sort property: " + property + ", direction: " + direction);
-                    orders.add(new Sort.Order(direction, property));
-                }
-            }
-
-            pageable = PageRequest.of(page, size, Sort.by(orders));
-            System.out.println("[DEBUG_LOG] Created pageable with sort: " + pageable);
-        } else {
-            pageable = PageRequest.of(page, size);
-            System.out.println("[DEBUG_LOG] Created pageable without sort: " + pageable);
-        }
-
-        // Get paginated pets
-        Page<Pet> petPage = this.clinicService.findAllPets(pageable);
-        List<PetDto> pets = new ArrayList<>(petMapper.toPetsDto(petPage.getContent()));
-
+    public ResponseEntity<List<PetDto>> listPets() {
+        List<PetDto> pets = new ArrayList<>(petMapper.toPetsDto(this.clinicService.findAllPets()));
         if (pets.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

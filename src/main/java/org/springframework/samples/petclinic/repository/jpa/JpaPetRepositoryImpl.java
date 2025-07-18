@@ -20,13 +20,9 @@ import java.util.List;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.model.PetType;
 import org.springframework.samples.petclinic.repository.PetRepository;
@@ -72,22 +68,6 @@ public class JpaPetRepositoryImpl implements PetRepository {
 	@Override
 	public Collection<Pet> findAll() throws DataAccessException {
 		return this.em.createQuery("SELECT pet FROM Pet pet").getResultList();
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public Page<Pet> findAll(Pageable pageable) throws DataAccessException {
-		// Get total count
-		TypedQuery<Long> countQuery = this.em.createQuery("SELECT COUNT(pet) FROM Pet pet", Long.class);
-		Long totalCount = countQuery.getSingleResult();
-
-		// Create paginated query
-		TypedQuery<Pet> query = this.em.createQuery("SELECT pet FROM Pet pet", Pet.class);
-		query.setFirstResult((int) pageable.getOffset());
-		query.setMaxResults(pageable.getPageSize());
-
-		List<Pet> pets = query.getResultList();
-		return new PageImpl<>(pets, pageable, totalCount);
 	}
 
 	@Override

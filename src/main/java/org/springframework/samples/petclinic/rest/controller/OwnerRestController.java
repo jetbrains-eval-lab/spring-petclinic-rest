@@ -68,7 +68,7 @@ public class OwnerRestController implements OwnersApi {
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
-    public ResponseEntity<List<OwnerDto>> listOwners(String lastName, Integer page, Integer size, List<String> sort) {
+    public ResponseEntity<List<OwnerDto>> listOwners(String lastName) {
         Collection<Owner> owners;
         if (lastName != null) {
             owners = this.clinicService.findOwnerByLastName(lastName);

@@ -50,7 +50,7 @@ public class PetTypeRestController implements PettypesApi {
 
     @PreAuthorize("hasAnyRole(@roles.OWNER_ADMIN, @roles.VET_ADMIN)")
     @Override
-    public ResponseEntity<List<PetTypeDto>> listPetTypes(Integer page, Integer size, List<String> sort) {
+    public ResponseEntity<List<PetTypeDto>> listPetTypes() {
         List<PetType> petTypes = new ArrayList<>(this.clinicService.findAllPetTypes());
         if (petTypes.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -52,7 +52,7 @@ public class SpecialtyRestController implements SpecialtiesApi {
 
     @PreAuthorize("hasRole(@roles.VET_ADMIN)")
     @Override
-    public ResponseEntity<List<SpecialtyDto>> listSpecialties(Integer page, Integer size, List<String> sort) {
+    public ResponseEntity<List<SpecialtyDto>> listSpecialties() {
         List<SpecialtyDto> specialties = new ArrayList<>();
         specialties.addAll(specialtyMapper.toSpecialtyDtos(this.clinicService.findAllSpecialties()));
         if (specialties.isEmpty()) {

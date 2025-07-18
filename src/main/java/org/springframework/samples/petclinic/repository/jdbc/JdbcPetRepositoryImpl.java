@@ -27,9 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -129,7 +126,7 @@ public class JdbcPetRepositoryImpl implements PetRepository {
             .addValue("type_id", pet.getType().getId())
             .addValue("owner_id", pet.getOwner().getId());
     }
-
+    
 	@Override
 	public Collection<Pet> findAll() throws DataAccessException {
 		Map<String, Object> params = new HashMap<>();
@@ -153,59 +150,6 @@ public class JdbcPetRepositoryImpl implements PetRepository {
 			pets.add(jdbcPet);
 		}
 		return pets;
-	}
-
-	@Override
-	public Page<Pet> findAll(Pageable pageable) throws DataAccessException {
-		// Get total count
-		Integer totalCount = this.namedParameterJdbcTemplate.queryForObject(
-				"SELECT COUNT(*) FROM pets", new HashMap<>(), Integer.class);
-
-		// Build paginated query
-		StringBuilder sqlBuilder = new StringBuilder();
-		sqlBuilder.append("SELECT pets.id as pets_id, name, birth_date, type_id, owner_id FROM pets");
-
-		// Add sorting if specified
-		if (pageable.getSort().isSorted()) {
-			sqlBuilder.append(" ORDER BY ");
-			pageable.getSort().forEach(order -> {
-				sqlBuilder.append(order.getProperty()).append(" ");
-				sqlBuilder.append(order.isAscending() ? "ASC" : "DESC").append(", ");
-			});
-			// Remove trailing comma and space
-			sqlBuilder.setLength(sqlBuilder.length() - 2);
-		}
-
-		// Add pagination
-		sqlBuilder.append(" LIMIT :limit OFFSET :offset");
-
-		Map<String, Object> params = new HashMap<>();
-		params.put("limit", pageable.getPageSize());
-		params.put("offset", pageable.getOffset());
-
-		// Execute query
-		List<JdbcPet> jdbcPets = this.namedParameterJdbcTemplate.query(
-				sqlBuilder.toString(), params, new JdbcPetRowMapper());
-
-		// Get pet types and owners for the pets
-		Collection<PetType> petTypes = this.namedParameterJdbcTemplate.query(
-				"SELECT id, name FROM types ORDER BY name",
-				new HashMap<>(), BeanPropertyRowMapper.newInstance(PetType.class));
-
-		Collection<Owner> owners = this.namedParameterJdbcTemplate.query(
-				"SELECT id, first_name, last_name, address, city, telephone FROM owners ORDER BY last_name",
-				new HashMap<>(), BeanPropertyRowMapper.newInstance(Owner.class));
-
-		// Build the result list
-		List<Pet> pets = new ArrayList<>();
-		for (JdbcPet jdbcPet : jdbcPets) {
-			jdbcPet.setType(EntityUtils.getById(petTypes, PetType.class, jdbcPet.getTypeId()));
-			jdbcPet.setOwner(EntityUtils.getById(owners, Owner.class, jdbcPet.getOwnerId()));
-			// TODO add visits
-			pets.add(jdbcPet);
-		}
-
-		return new PageImpl<>(pets, pageable, totalCount);
 	}
 
 	@Override
