@@ -16,6 +16,10 @@
 
 package org.springframework.samples.petclinic.rest.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.PetMapper;
@@ -26,6 +30,7 @@ import org.springframework.samples.petclinic.service.ClinicService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -67,6 +72,27 @@ public class PetRestController implements PetsApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(pets, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
+    @RequestMapping(value = "/pets/pages", method = org.springframework.web.bind.annotation.RequestMethod.GET)
+    public ResponseEntity<Page<PetDto>> listPetsWithPagination(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
+
+        List<PetDto> allPets = new ArrayList<>(petMapper.toPetsDto(this.clinicService.findAllPets()));
+        if (allPets.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), allPets.size());
+
+        List<PetDto> paginatedPets = allPets.subList(start, end);
+        Page<PetDto> petPage = new PageImpl<>(paginatedPets, pageable, allPets.size());
+
+        return new ResponseEntity<>(petPage, HttpStatus.OK);
     }
 
 
