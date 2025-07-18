@@ -9,14 +9,14 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.sql.DataSource;
-import java.util.Map;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true) // Enable @PreAuthorize method-level security
@@ -31,28 +31,36 @@ public class BasicAuthenticationConfig {
         return new BCryptPasswordEncoder();
     }
 
-
+    @Bean
+    public UserDetailsService userDetailsService() {
+        JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
+        userDetailsManager.setUsersByUsernameQuery("select username,password,enabled from users where username=?");
+        userDetailsManager.setAuthoritiesByUsernameQuery("select username,role from roles where username=?");
+        return userDetailsManager;
+    }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public TenantAwareAuthenticationProvider tenantAuthenticationProvider(
+        AuthenticationManagerBuilder auth, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder
+    ) {
+        TenantAwareAuthenticationProvider provider = new TenantAwareAuthenticationProvider(userDetailsService, dataSource);
+        provider.setPasswordEncoder(passwordEncoder);
+
+        auth.authenticationProvider(provider);
+
+        return provider;
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http, TenantFilter tenantFilter) throws Exception {
         // @formatter:off
         http
             .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests((authz) -> authz
+            .authorizeHttpRequests((auth) -> auth
                 .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults())
+            .addFilterBefore(tenantFilter, BasicAuthenticationFilter.class);
         // @formatter:on
         return http.build();
-    }
-
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        // @formatter:off
-        auth
-            .jdbcAuthentication()
-                .dataSource(dataSource)
-                .usersByUsernameQuery("select username,password,enabled from users where username=?")
-                .authoritiesByUsernameQuery("select username,role from roles where username=?");
-        // @formatter:on
     }
 }

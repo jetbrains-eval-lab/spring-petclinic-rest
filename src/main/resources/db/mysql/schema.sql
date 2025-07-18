@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS users (
   username VARCHAR(20) NOT NULL ,
   password VARCHAR(60) NOT NULL ,
   enabled TINYINT NOT NULL DEFAULT 1 ,
+  tenant_id VARCHAR(50) ,
   PRIMARY KEY (username)
 ) engine=InnoDB;
 
