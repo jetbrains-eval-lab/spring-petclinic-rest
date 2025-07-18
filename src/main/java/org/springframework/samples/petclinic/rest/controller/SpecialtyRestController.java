@@ -38,7 +38,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(exposedHeaders = "errors, content-type")
-@RequestMapping("api")
+@RequestMapping("api/v1")
 public class SpecialtyRestController implements SpecialtiesApi {
 
     private final ClinicService clinicService;
@@ -77,7 +77,7 @@ public class SpecialtyRestController implements SpecialtiesApi {
         HttpHeaders headers = new HttpHeaders();
         Specialty specialty = specialtyMapper.toSpecialty(specialtyDto);
         this.clinicService.saveSpecialty(specialty);
-        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/specialties/{id}").buildAndExpand(specialty.getId()).toUri());
+        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/v1/specialties/{id}").buildAndExpand(specialty.getId()).toUri());
         return new ResponseEntity<>(specialtyMapper.toSpecialtyDto(specialty), headers, HttpStatus.CREATED);
     }
 

@@ -45,7 +45,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(exposedHeaders = "errors, content-type")
-@RequestMapping("/api")
+@RequestMapping("api/v1")
 public class OwnerRestController implements OwnersApi {
 
     private final ClinicService clinicService;
@@ -99,7 +99,7 @@ public class OwnerRestController implements OwnersApi {
         this.clinicService.saveOwner(owner);
         OwnerDto ownerDto = ownerMapper.toOwnerDto(owner);
         headers.setLocation(UriComponentsBuilder.newInstance()
-            .path("/api/owners/{id}").buildAndExpand(owner.getId()).toUri());
+            .path("/api/v1/owners/{id}").buildAndExpand(owner.getId()).toUri());
         return new ResponseEntity<>(ownerDto, headers, HttpStatus.CREATED);
     }
 
@@ -142,7 +142,7 @@ public class OwnerRestController implements OwnersApi {
         pet.getType().setName(null);
         this.clinicService.savePet(pet);
         PetDto petDto = petMapper.toPetDto(pet);
-        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/pets/{id}")
+        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/v1/pets/{id}")
             .buildAndExpand(pet.getId()).toUri());
         return new ResponseEntity<>(petDto, headers, HttpStatus.CREATED);
     }
@@ -174,7 +174,7 @@ public class OwnerRestController implements OwnersApi {
         visit.setPet(pet);
         this.clinicService.saveVisit(visit);
         VisitDto visitDto = visitMapper.toVisitDto(visit);
-        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/visits/{id}")
+        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/v1/visits/{id}")
             .buildAndExpand(visit.getId()).toUri());
         return new ResponseEntity<>(visitDto, headers, HttpStatus.CREATED);
     }

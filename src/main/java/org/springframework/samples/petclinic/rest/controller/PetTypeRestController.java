@@ -36,7 +36,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(exposedHeaders = "errors, content-type")
-@RequestMapping("api")
+@RequestMapping("api/v1")
 public class PetTypeRestController implements PettypesApi {
 
     private final ClinicService clinicService;
@@ -74,7 +74,7 @@ public class PetTypeRestController implements PettypesApi {
         HttpHeaders headers = new HttpHeaders();
         final PetType type = petTypeMapper.toPetType(petTypeFieldsDto);
         this.clinicService.savePetType(type);
-        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/pettypes/{id}").buildAndExpand(type.getId()).toUri());
+        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/v1/pettypes/{id}").buildAndExpand(type.getId()).toUri());
         return new ResponseEntity<>(petTypeMapper.toPetTypeDto(type), headers, HttpStatus.CREATED);
     }
 

@@ -38,7 +38,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(exposedHeaders = "errors, content-type")
-@RequestMapping("api")
+@RequestMapping("api/v1")
 public class VisitRestController implements VisitsApi {
 
     private final ClinicService clinicService;
@@ -78,7 +78,7 @@ public class VisitRestController implements VisitsApi {
         Visit visit = visitMapper.toVisit(visitDto);
         this.clinicService.saveVisit(visit);
         visitDto = visitMapper.toVisitDto(visit);
-        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/visits/{id}").buildAndExpand(visit.getId()).toUri());
+        headers.setLocation(UriComponentsBuilder.newInstance().path("/api/v1/visits/{id}").buildAndExpand(visit.getId()).toUri());
         return new ResponseEntity<>(visitDto, headers, HttpStatus.CREATED);
     }
 
