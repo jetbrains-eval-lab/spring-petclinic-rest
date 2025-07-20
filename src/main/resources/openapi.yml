@@ -965,6 +965,132 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
+  /pets/{petId}/photo:
+    post:
+      tags:
+        - pet
+      operationId: uploadPetPhoto
+      summary: Upload a photo for a pet
+      description: Uploads and stores a photo for the specified pet.
+      parameters:
+        - name: petId
+          in: path
+          description: The ID of the pet.
+          required: true
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            example: 1
+      requestBody:
+        description: The pet photo to upload
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: The photo file to upload
+        required: true
+      responses:
+        200:
+          description: Photo uploaded successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  photoPath:
+                    type: string
+                    description: The path to the uploaded photo
+                    example: '/uploads/pets/1/photo.jpg'
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        404:
+          description: Pet not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+    get:
+      tags:
+        - pet
+      operationId: getPetPhoto
+      summary: Get a pet's photo
+      description: Retrieves the photo for the specified pet.
+      parameters:
+        - name: petId
+          in: path
+          description: The ID of the pet.
+          required: true
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            example: 1
+      responses:
+        200:
+          description: Photo retrieved successfully.
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+        404:
+          description: Pet or photo not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+    delete:
+      tags:
+        - pet
+      operationId: deletePetPhoto
+      summary: Delete a pet's photo
+      description: Deletes the photo for the specified pet.
+      parameters:
+        - name: petId
+          in: path
+          description: The ID of the pet.
+          required: true
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            example: 1
+      responses:
+        204:
+          description: Photo deleted successfully.
+        404:
+          description: Pet or photo not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /visits:
     get:
       tags:
@@ -1953,6 +2079,11 @@ components:
           type: string
           format: date
           example: '2010-09-07'
+        photoPath:
+          title: Photo Path
+          description: The path to the pet's photo.
+          type: string
+          example: '/uploads/pets/leo.jpg'
         type:
           $ref: '#/components/schemas/PetType'
       required:
