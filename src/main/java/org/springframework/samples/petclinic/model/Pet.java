@@ -38,6 +38,9 @@ public class Pet extends NamedEntity {
     @Column(name = "birth_date", columnDefinition = "DATE")
     private LocalDate birthDate;
 
+    @Column(name = "photo_path")
+    private String photoPath;
+
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "type_id")
     private PetType type;
@@ -71,6 +74,14 @@ public class Pet extends NamedEntity {
 
     public void setOwner(Owner owner) {
         this.owner = owner;
+    }
+
+    public String getPhotoPath() {
+        return this.photoPath;
+    }
+
+    public void setPhotoPath(String photoPath) {
+        this.photoPath = photoPath;
     }
 
     protected Set<Visit> getVisitsInternal() {
