@@ -14,7 +14,7 @@ INSERT INTO specialties (name) VALUES
 ('dentistry');
 
 -- Link Vets to Specialties
-INSERT INTO vet_specialties (vet_id, specialty_id) VALUES 
+MERGE INTO vet_specialties (vet_id, specialty_id) KEY (vet_id, specialty_id) VALUES
 (2, 1),
 (3, 2),
 (3, 3),
@@ -66,12 +66,12 @@ INSERT INTO visits (pet_id, visit_date, description) VALUES
 (8, '2013-01-03', 'neutered'),
 (7, '2013-01-04', 'spayed');
 
--- Insert Admin User
-INSERT INTO users (username, password, enabled) VALUES
+-- Insert Admin User (idempotent for repeated test context initializations)
+MERGE INTO users (username, password, enabled) KEY (username) VALUES
 ('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
 
--- Assign Roles to Admin
-INSERT INTO roles (username, role) VALUES 
+-- Assign Roles to Admin (idempotent for repeated test context initializations)
+MERGE INTO roles (username, role) KEY (username, role) VALUES
 ('admin', 'ROLE_OWNER_ADMIN'),
 ('admin', 'ROLE_VET_ADMIN'),
 ('admin', 'ROLE_ADMIN');
