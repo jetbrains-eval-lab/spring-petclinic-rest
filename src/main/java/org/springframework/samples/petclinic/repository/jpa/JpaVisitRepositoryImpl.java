@@ -78,7 +78,9 @@ public class JpaVisitRepositoryImpl implements VisitRepository {
 
 	@Override
 	public void delete(Visit visit) throws DataAccessException {
-        this.em.remove(this.em.contains(visit) ? visit : this.em.merge(visit));
+        this.em.createQuery("DELETE FROM Visit visit WHERE id = :id")
+            .setParameter("id", visit.getId())
+            .executeUpdate();
 	}
 
 }

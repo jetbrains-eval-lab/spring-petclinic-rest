@@ -75,7 +75,10 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional
-    @CacheEvict(value = CacheConfig.CACHE_PETS, allEntries = true)
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.CACHE_PETS, allEntries = true),
+        @CacheEvict(value = CacheConfig.CACHE_OWNERS, allEntries = true)
+    })
     public void deletePet(Pet pet) throws DataAccessException {
         petRepository.delete(pet);
     }
@@ -96,7 +99,10 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional
-    @CacheEvict(value = CacheConfig.CACHE_VISITS, allEntries = true)
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.CACHE_VISITS, allEntries = true),
+        @CacheEvict(value = CacheConfig.CACHE_PETS, allEntries = true)
+    })
     public void deleteVisit(Visit visit) throws DataAccessException {
         visitRepository.delete(visit);
     }

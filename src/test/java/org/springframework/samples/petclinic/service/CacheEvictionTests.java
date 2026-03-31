@@ -7,6 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.samples.petclinic.config.CacheConfig;
+import org.springframework.samples.petclinic.model.Owner;
+import org.springframework.samples.petclinic.model.Pet;
+import org.springframework.samples.petclinic.model.PetType;
 import org.springframework.samples.petclinic.model.Specialty;
 import org.springframework.samples.petclinic.model.Vet;
 import org.springframework.samples.petclinic.repository.SpecialtyRepository;
@@ -77,6 +80,76 @@ class CacheEvictionTests {
 
         // Repository should only be called once due to caching
         verify(vetRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testOwnerCacheIsPopulatedOnRead() {
+        Owner owner = new Owner();
+        owner.setId(1);
+        owner.setFirstName("George");
+        owner.setLastName("Franklin");
+
+        when(ownerRepository.findById(1)).thenReturn(owner);
+
+        clinicService.findOwnerById(1);
+        clinicService.findOwnerById(1);
+
+        verify(ownerRepository, times(1)).findById(1);
+    }
+
+    @Test
+    void testOwnerListCacheIsPopulatedOnRead() {
+        Owner owner = new Owner();
+        owner.setId(1);
+        owner.setFirstName("George");
+        owner.setLastName("Franklin");
+
+        when(ownerRepository.findAll()).thenReturn(List.of(owner));
+
+        clinicService.findAllOwners();
+        clinicService.findAllOwners();
+
+        verify(ownerRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testOwnerSearchCacheIsPopulatedOnRead() {
+        Owner owner = new Owner();
+        owner.setId(3);
+        owner.setFirstName("Eduardo");
+        owner.setLastName("Rodriquez");
+
+        when(ownerRepository.findByLastName("Rod")).thenReturn(List.of(owner));
+
+        clinicService.findOwnerByLastName("Rod");
+        clinicService.findOwnerByLastName("Rod");
+
+        verify(ownerRepository, times(1)).findByLastName("Rod");
+    }
+
+    @Test
+    void testPetCacheIsPopulatedOnRead() {
+        Owner owner = new Owner();
+        owner.setId(6);
+        owner.setFirstName("Jean");
+        owner.setLastName("Coleman");
+
+        PetType petType = new PetType();
+        petType.setId(1);
+        petType.setName("cat");
+
+        Pet pet = new Pet();
+        pet.setId(7);
+        pet.setName("Samantha");
+        pet.setOwner(owner);
+        pet.setType(petType);
+
+        when(petRepository.findById(7)).thenReturn(pet);
+
+        clinicService.findPetById(7);
+        clinicService.findPetById(7);
+
+        verify(petRepository, times(1)).findById(7);
     }
 
     @Test
