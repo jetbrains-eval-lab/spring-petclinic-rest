@@ -15,7 +15,11 @@
  */
 package org.springframework.samples.petclinic.repository.springdatajpa;
 
+import java.util.Collection;
+
 import org.springframework.context.annotation.Profile;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.samples.petclinic.model.Vet;
 import org.springframework.samples.petclinic.repository.VetRepository;
@@ -29,4 +33,8 @@ import org.springframework.samples.petclinic.repository.VetRepository;
 
 @Profile("spring-data-jpa")
 public interface SpringDataVetRepository extends VetRepository, Repository<Vet, Integer> {
+
+    @Override
+    @Query("SELECT DISTINCT vet FROM Vet vet left join fetch vet.specialties")
+    Collection<Vet> findAll() throws DataAccessException;
 }

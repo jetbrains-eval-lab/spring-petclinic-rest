@@ -16,6 +16,7 @@
 package org.springframework.samples.petclinic.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 
@@ -38,6 +39,7 @@ public class Vet extends Person {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
         inverseJoinColumns = @JoinColumn(name = "specialty_id"))
+    @BatchSize(size = 10)
     private Set<Specialty> specialties;
 
     @JsonIgnore
