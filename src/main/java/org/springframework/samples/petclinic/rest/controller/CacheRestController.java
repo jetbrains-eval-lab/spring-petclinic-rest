@@ -39,6 +39,6 @@ public class CacheRestController {
                 cache.clear();
             }
         });
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
