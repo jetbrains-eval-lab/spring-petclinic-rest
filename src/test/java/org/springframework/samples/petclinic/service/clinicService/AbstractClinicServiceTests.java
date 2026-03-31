@@ -15,10 +15,8 @@
  */
 package org.springframework.samples.petclinic.service.clinicService;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.samples.petclinic.model.*;
 import org.springframework.samples.petclinic.service.ClinicService;
 import org.springframework.samples.petclinic.util.EntityUtils;
@@ -57,19 +55,6 @@ abstract class AbstractClinicServiceTests {
 
     @Autowired
     protected ClinicService clinicService;
-
-    @Autowired
-    private CacheManager cacheManager;
-
-    @BeforeEach
-    void evictAllCaches() {
-        cacheManager.getCacheNames().forEach(name -> {
-            var cache = cacheManager.getCache(name);
-            if (cache != null) {
-                cache.clear();
-            }
-        });
-    }
 
     @Test
     void shouldFindOwnersByLastName() {
