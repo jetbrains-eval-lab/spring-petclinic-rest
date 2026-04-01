@@ -1,5 +1,7 @@
 package org.springframework.samples.petclinic.repository.jpa;
 
+import java.util.Optional;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -23,5 +25,10 @@ public class JpaUserRepositoryImpl implements UserRepository {
         } else {
             this.em.merge(user);
         }
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return Optional.ofNullable(this.em.find(User.class, username));
     }
 }

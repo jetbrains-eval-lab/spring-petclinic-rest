@@ -66,16 +66,22 @@ ALTER TABLE visits ADD CONSTRAINT fk_visits_pets FOREIGN KEY (pet_id) REFERENCES
 CREATE INDEX visits_pet_id ON visits (pet_id);
 
 CREATE  TABLE users (
-  username    VARCHAR(20) NOT NULL ,
-  password    VARCHAR(60) NOT NULL ,
-  enabled     BOOLEAN DEFAULT TRUE NOT NULL ,
+  username     VARCHAR(255) NOT NULL ,
+  password     VARCHAR(255) ,
+  enabled      BOOLEAN DEFAULT TRUE NOT NULL ,
+  email        VARCHAR(255) ,
+  first_name   VARCHAR(100) ,
+  last_name    VARCHAR(100) ,
+  oauth_id     VARCHAR(255) ,
+  oauth_provider VARCHAR(50) ,
+  picture_url  VARCHAR(512) ,
   PRIMARY KEY (username)
 );
 
 CREATE TABLE roles (
   id              INTEGER IDENTITY PRIMARY KEY,
-  username        VARCHAR(20) NOT NULL,
-  role            VARCHAR(20) NOT NULL
+  username        VARCHAR(255) NOT NULL,
+  role            VARCHAR(50) NOT NULL
 );
 ALTER TABLE roles ADD CONSTRAINT fk_username FOREIGN KEY (username) REFERENCES users (username);
 CREATE INDEX fk_username_idx ON roles (username);

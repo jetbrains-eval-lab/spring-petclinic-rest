@@ -55,16 +55,22 @@ CREATE TABLE IF NOT EXISTS visits (
 ) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS users (
-  username VARCHAR(20) NOT NULL ,
-  password VARCHAR(60) NOT NULL ,
+  username VARCHAR(255) NOT NULL ,
+  password VARCHAR(255) ,
   enabled TINYINT NOT NULL DEFAULT 1 ,
+  email VARCHAR(255) ,
+  first_name VARCHAR(100) ,
+  last_name VARCHAR(100) ,
+  oauth_id VARCHAR(255) ,
+  oauth_provider VARCHAR(50) ,
+  picture_url VARCHAR(512) ,
   PRIMARY KEY (username)
 ) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS roles (
   id int(11) NOT NULL AUTO_INCREMENT,
-  username varchar(20) NOT NULL,
-  role varchar(20) NOT NULL,
+  username varchar(255) NOT NULL,
+  role varchar(50) NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY uni_username_role (role,username),
   KEY fk_username_idx (username),

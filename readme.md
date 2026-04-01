@@ -249,6 +249,142 @@ There is an existing user with the username `admin` and password `admin` that ha
 }
 ```
 
+### Google OAuth2 Social Login
+
+Petclinic supports Google OAuth2 login with server-side session management.
+
+#### Setup
+
+1. Create a Google OAuth2 application in [Google Cloud Console](https://console.cloud.google.com/) and obtain a client ID and secret.
+
+2. Configure `application.properties`:
+
+```properties
+petclinic.security.oauth2.enable=true
+petclinic.security.oauth2.default-login-provider=google
+
+spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.scope=openid,email,profile
+```
+
+3. Set the authorized redirect URI in Google Cloud Console to:
+   `http://localhost:9966/petclinic/login/oauth2/code/google`
+
+#### Admin Role Assignment
+
+Grant admin roles to specific email addresses using the `petclinic.security.oauth2.admin-emails` property:
+
+```properties
+# Format: email1:ROLE1,ROLE2;email2:ROLE3
+petclinic.security.oauth2.admin-emails=admin@example.com:ROLE_ADMIN,ROLE_VET_ADMIN;owner@example.com:ROLE_OWNER_ADMIN
+```
+
+Regular users who log in via OAuth2 receive `ROLE_USER` by default.
+
+#### Authentication API
+
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| GET | `/api/auth/login` | Public | Returns authentication status and login URL |
+| POST | `/api/auth/logout` | Public | Invalidates the session |
+
+**GET /api/auth/login (unauthenticated):**
+```json
+{
+  "authenticated": false,
+  "loginUrl": "/oauth2/authorization/google"
+}
+```
+
+**GET /api/auth/login (authenticated):**
+```json
+{
+  "authenticated": true,
+  "username": "user@example.com",
+  "roles": ["ROLE_USER"]
+}
+```
+
+To initiate login, redirect the user to `/oauth2/authorization/google`.
+
+#### Session Attributes API
+
+Once authenticated, user-defined session attributes (preferences, settings) can be managed:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/session/user` | Get authenticated user info from session |
+| GET | `/api/session/attributes/{key}` | Get a specific session attribute |
+| PUT | `/api/session/attributes/{key}` | Set or update a session attribute |
+| DELETE | `/api/session/attributes/{key}` | Remove a session attribute |
+
+**Examples:**
+
+Set a preference:
+```bash
+curl -X PUT http://localhost:9966/petclinic/api/session/attributes/theme \
+  -H 'Content-Type: application/json' \
+  -d '"dark"' \
+  --cookie "JSESSIONID=<session-id>"
+```
+
+Get a preference:
+```bash
+curl http://localhost:9966/petclinic/api/session/attributes/theme \
+  --cookie "JSESSIONID=<session-id>"
+```
+
+The key `authenticated_user` is reserved and cannot be set via the API.
+
+#### Session Storage
+
+By default, sessions are stored in memory. For distributed/scalable deployments, configure Spring Session with Redis or JDBC:
+
+**Redis (add to pom.xml):**
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.session</groupId>
+    <artifactId>spring-session-data-redis</artifactId>
+</dependency>
+```
+
+```properties
+spring.session.store-type=redis
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+```
+
+**JDBC (add to pom.xml):**
+```xml
+<dependency>
+    <groupId>org.springframework.session</groupId>
+    <artifactId>spring-session-jdbc</artifactId>
+</dependency>
+```
+
+```properties
+spring.session.store-type=jdbc
+```
+
+#### Adding Additional OAuth2 Providers
+
+To add GitHub login alongside Google:
+
+```properties
+spring.security.oauth2.client.registration.github.client-id=YOUR_GITHUB_CLIENT_ID
+spring.security.oauth2.client.registration.github.client-secret=YOUR_GITHUB_CLIENT_SECRET
+spring.security.oauth2.client.registration.github.scope=read:user,user:email
+```
+
+The application automatically handles provider-specific attribute mapping:
+- **Google**: uses `sub`, `email`, `given_name`, `family_name`, `picture`
+- **Other providers**: falls back to `email` for username; if no email, uses `provider:userId` as stable identity
+
 ## Working with Petclinic in Eclipse/STS
 
 ### prerequisites

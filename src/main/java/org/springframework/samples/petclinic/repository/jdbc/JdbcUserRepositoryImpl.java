@@ -2,6 +2,7 @@ package org.springframework.samples.petclinic.repository.jdbc;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -43,6 +44,15 @@ public class JdbcUserRepositoryImpl implements UserRepository {
             this.insertUser.execute(parameterSource);
         } finally {
             updateUserRoles(user);
+        }
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        try {
+            return Optional.of(getByUsername(username));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
         }
     }
 
