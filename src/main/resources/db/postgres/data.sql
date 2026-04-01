@@ -1,4 +1,17 @@
-INSERT INTO vets (first_name, last_name) SELECT 'James', 'Carter' WHERE NOT EXISTS (SELECT * FROM vets WHERE id=1);
+INSERT INTO users(username, password, enabled) VALUES
+('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
+INSERT INTO users(username, password, enabled) VALUES
+('owner1', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
+INSERT INTO users(username, password, enabled) VALUES
+('vet1', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
+
+INSERT INTO roles (username, role) SELECT 'admin', 'ROLE_OWNER_ADMIN' WHERE NOT EXISTS (SELECT * FROM roles WHERE username='admin' AND role='ROLE_OWNER_ADMIN');
+INSERT INTO roles (username, role) SELECT 'admin', 'ROLE_VET_ADMIN' WHERE NOT EXISTS (SELECT * FROM roles WHERE username='admin' AND role='ROLE_VET_ADMIN');
+INSERT INTO roles (username, role) SELECT 'admin', 'ROLE_ADMIN' WHERE NOT EXISTS (SELECT * FROM roles WHERE username='admin' AND role='ROLE_ADMIN');
+INSERT INTO roles (username, role) SELECT 'owner1', 'ROLE_OWNER' WHERE NOT EXISTS (SELECT * FROM roles WHERE username='owner1' AND role='ROLE_OWNER');
+INSERT INTO roles (username, role) SELECT 'vet1', 'ROLE_VET' WHERE NOT EXISTS (SELECT * FROM roles WHERE username='vet1' AND role='ROLE_VET');
+
+INSERT INTO vets (first_name, last_name, username) SELECT 'James', 'Carter', 'vet1' WHERE NOT EXISTS (SELECT * FROM vets WHERE id=1);
 INSERT INTO vets (first_name, last_name) SELECT 'Helen', 'Leary' WHERE NOT EXISTS (SELECT * FROM vets WHERE id=2);
 INSERT INTO vets (first_name, last_name) SELECT 'Linda', 'Douglas' WHERE NOT EXISTS (SELECT * FROM vets WHERE id=3);
 INSERT INTO vets (first_name, last_name) SELECT 'Rafael', 'Ortega' WHERE NOT EXISTS (SELECT * FROM vets WHERE id=4);
@@ -22,7 +35,7 @@ INSERT INTO types (name) SELECT 'snake' WHERE NOT EXISTS (SELECT * FROM types WH
 INSERT INTO types (name) SELECT 'bird' WHERE NOT EXISTS (SELECT * FROM types WHERE name='bird');
 INSERT INTO types (name) SELECT 'hamster' WHERE NOT EXISTS (SELECT * FROM types WHERE name='hamster');
 
-INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'George', 'Franklin', '110 W. Liberty St.', 'Madison', '6085551023' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=1);
+INSERT INTO owners (first_name, last_name, address, city, telephone, username) SELECT 'George', 'Franklin', '110 W. Liberty St.', 'Madison', '6085551023', 'owner1' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=1);
 INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Betty', 'Davis', '638 Cardinal Ave.', 'Sun Prairie', '6085551749' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=2);
 INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Eduardo', 'Rodriquez', '2693 Commerce St.', 'McFarland', '6085558763' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=3);
 INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Harold', 'Davis', '563 Friendly St.', 'Windsor', '6085553198' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=4);
@@ -51,10 +64,3 @@ INSERT INTO visits (pet_id, visit_date, description) SELECT 7, '2010-03-04', 'ra
 INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2011-03-04', 'rabies shot' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=2);
 INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2009-06-04', 'neutered' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=3);
 INSERT INTO visits (pet_id, visit_date, description) SELECT 7, '2008-09-04', 'spayed' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=4);
-
-INSERT INTO users(username, password, enabled) VALUES
-('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
-
-INSERT INTO roles (username, role) SELECT 'admin', 'ROLE_OWNER_ADMIN' WHERE NOT EXISTS (SELECT * FROM roles WHERE id=1);
-INSERT INTO roles (username, role) SELECT 'admin', 'ROLE_VET_ADMIN' WHERE NOT EXISTS (SELECT * FROM roles WHERE id=2);
-INSERT INTO roles (username, role) SELECT'admin', 'ROLE_ADMIN' WHERE NOT EXISTS (SELECT * FROM roles WHERE id=3);

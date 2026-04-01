@@ -1,7 +1,23 @@
+CREATE TABLE IF NOT EXISTS users (
+  username VARCHAR(20) NOT NULL PRIMARY KEY,
+  password VARCHAR(255) NOT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS roles (
+  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  username VARCHAR(20) NOT NULL,
+  role VARCHAR(20) NOT NULL,
+  UNIQUE (role, username),
+  FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS vets (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   first_name VARCHAR(30) NOT NULL,
-  last_name VARCHAR(30) NOT NULL
+  last_name VARCHAR(30) NOT NULL,
+  username VARCHAR(20),
+  FOREIGN KEY (username) REFERENCES users(username) ON DELETE SET NULL
 );
 
 CREATE INDEX idx_vets_last_name ON vets(last_name);
@@ -34,7 +50,9 @@ CREATE TABLE IF NOT EXISTS owners (
   last_name VARCHAR(30) NOT NULL,
   address VARCHAR(255) NOT NULL,
   city VARCHAR(80) NOT NULL,
-  telephone VARCHAR(20) NOT NULL
+  telephone VARCHAR(20) NOT NULL,
+  username VARCHAR(20),
+  FOREIGN KEY (username) REFERENCES users(username) ON DELETE SET NULL
 );
 
 CREATE INDEX idx_owners_last_name ON owners(last_name);
@@ -57,18 +75,4 @@ CREATE TABLE IF NOT EXISTS visits (
   visit_date DATE NOT NULL,
   description VARCHAR(255) NOT NULL,
   FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS users (
-  username VARCHAR(20) NOT NULL PRIMARY KEY,
-  password VARCHAR(255) NOT NULL,
-  enabled BOOLEAN NOT NULL DEFAULT TRUE
-);
-
-CREATE TABLE IF NOT EXISTS roles (
-  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  username VARCHAR(20) NOT NULL,
-  role VARCHAR(20) NOT NULL,
-  UNIQUE (role, username),
-  FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );

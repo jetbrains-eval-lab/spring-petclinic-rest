@@ -18,6 +18,7 @@ package org.springframework.samples.petclinic.rest.advice;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +60,14 @@ public class ExceptionControllerAdvice {
         detail.setDetail(ex.getLocalizedMessage());
         detail.setProperty("timestamp", Instant.now());
         return detail;
+    }
+
+    /**
+     * Re-throw AccessDeniedException so Spring Security's ExceptionTranslationFilter handles it.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public void handleAccessDeniedException(AccessDeniedException ex) throws AccessDeniedException {
+        throw ex;
     }
 
     /**

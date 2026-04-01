@@ -13,9 +13,11 @@ import java.util.Collection;
  */
 @Mapper(uses = SpecialtyMapper.class)
 public interface VetMapper {
+    @Mapping(target = "username", ignore = true)
     Vet toVet(VetDto vetDto);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "username", ignore = true)
     Vet toVet(VetFieldsDto vetFieldsDto);
 
     VetDto toVetDto(Vet vet);
