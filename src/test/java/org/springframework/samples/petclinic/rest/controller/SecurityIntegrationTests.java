@@ -139,6 +139,60 @@ class SecurityIntegrationTests {
 
     @Test
     @WithMockUser(username = "owner1", roles = {"OWNER"})
+    void ownerCanAccessOwnPet() throws Exception {
+        mockMvc.perform(get("/api/pets/1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(1));
+    }
+
+    @Test
+    @WithMockUser(username = "owner1", roles = {"OWNER"})
+    void ownerCanCreateAndUpdateOwnPet() throws Exception {
+        String petJson = "{\"name\":\"SecondPet\",\"birthDate\":\"2020-01-01\",\"type\":{\"id\":1,\"name\":\"cat\"}}";
+
+        String response = mockMvc.perform(post("/api/owners/1/pets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(petJson)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated())
+            .andReturn().getResponse().getContentAsString();
+
+        Integer newPetId = com.jayway.jsonpath.JsonPath.parse(response).read("$.id");
+
+        mockMvc.perform(get("/api/pets/" + newPetId)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(newPetId))
+            .andExpect(jsonPath("$.name").value("SecondPet"));
+
+        String updatedPetJson = "{\"id\":" + newPetId + ",\"name\":\"UpdatedPet\",\"birthDate\":\"2020-01-01\",\"type\":{\"id\":1,\"name\":\"cat\"}}";
+
+        mockMvc.perform(put("/api/owners/1/pets/" + newPetId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updatedPetJson)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(username = "owner1", roles = {"OWNER"})
+    void ownerCannotAccessOtherOwnerPet() throws Exception {
+        mockMvc.perform(get("/api/pets/2")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "owner1", roles = {"OWNER"})
+    void ownerCannotAccessNonExistentPet() throws Exception {
+        mockMvc.perform(get("/api/pets/9999")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "owner1", roles = {"OWNER"})
     void ownerCannotAccessOtherOwnerProfile() throws Exception {
         mockMvc.perform(get("/api/owners/2").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isForbidden());
@@ -168,6 +222,13 @@ class SecurityIntegrationTests {
     }
 
     @Test
+    @WithMockUser(username = "admin", roles = {"OWNER_ADMIN"})
+    void ownerAdminCanAccessAnyPet() throws Exception {
+        mockMvc.perform(get("/api/pets/1").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
     @WithMockUser(username = "admin", roles = {"VET_ADMIN"})
     void vetAdminCanAccessAnyVet() throws Exception {
         mockMvc.perform(get("/api/vets/1").accept(MediaType.APPLICATION_JSON))
@@ -189,6 +250,12 @@ class SecurityIntegrationTests {
     @Test
     void unauthenticatedCannotAccessOwners() throws Exception {
         mockMvc.perform(get("/api/owners").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void unauthenticatedCannotAccessPet() throws Exception {
+        mockMvc.perform(get("/api/pets/1").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isUnauthorized());
     }
 
