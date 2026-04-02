@@ -52,7 +52,16 @@ public class JpaPetRepositoryImpl implements PetRepository {
 
     @Override
     public Pet findById(int id) {
-        return this.em.find(Pet.class, id);
+        return this.em.createQuery(
+                "SELECT pet FROM Pet pet " +
+                    "left join fetch pet.visits " +
+                    "left join fetch pet.type " +
+                    "left join fetch pet.owner " +
+                    "WHERE pet.id = :id", Pet.class)
+            .setParameter("id", id)
+            .getResultStream()
+            .findFirst()
+            .orElse(null);
     }
 
     @Override
@@ -67,7 +76,12 @@ public class JpaPetRepositoryImpl implements PetRepository {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<Pet> findAll() throws DataAccessException {
-		return this.em.createQuery("SELECT pet FROM Pet pet").getResultList();
+		return this.em.createQuery(
+			"SELECT DISTINCT pet FROM Pet pet " +
+				"left join fetch pet.visits " +
+				"left join fetch pet.type " +
+				"left join fetch pet.owner")
+			.getResultList();
 	}
 
 	@Override

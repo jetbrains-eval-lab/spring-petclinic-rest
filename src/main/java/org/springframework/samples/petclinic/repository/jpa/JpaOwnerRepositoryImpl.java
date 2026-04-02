@@ -23,7 +23,6 @@ import jakarta.persistence.Query;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DataAccessException;
-import org.springframework.orm.hibernate5.support.OpenSessionInViewFilter;
 import org.springframework.samples.petclinic.model.Owner;
 import org.springframework.samples.petclinic.repository.OwnerRepository;
 import org.springframework.stereotype.Repository;
@@ -46,26 +45,29 @@ public class JpaOwnerRepositoryImpl implements OwnerRepository {
 
 
     /**
-     * Important: in the current version of this method, we load Owners with all their Pets and Visits while
-     * we do not need Visits at all and we only need one property from the Pet objects (the 'name' property).
-     * There are some ways to improve it such as:
-     * - creating a Ligtweight class (example here: https://community.jboss.org/wiki/LightweightClass)
-     * - Turning on lazy-loading and using {@link OpenSessionInViewFilter}
+     * Important: owner REST responses serialize pets, pet types and pet visits. Fetching them here keeps the
+     * web layer independent from an open persistence session.
      */
     @SuppressWarnings("unchecked")
     public Collection<Owner> findByLastName(String lastName) {
-        // using 'join fetch' because a single query should load both owners and pets
-        // using 'left join fetch' because it might happen that an owner does not have pets yet
-        Query query = this.em.createQuery("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.lastName LIKE :lastName");
+        Query query = this.em.createQuery(
+            "SELECT DISTINCT owner FROM Owner owner "
+                + "left join fetch owner.pets pet "
+                + "left join fetch pet.type "
+                + "left join fetch pet.visits "
+                + "WHERE owner.lastName LIKE :lastName");
         query.setParameter("lastName", lastName + "%");
         return query.getResultList();
     }
 
     @Override
     public Owner findById(int id) {
-        // using 'join fetch' because a single query should load both owners and pets
-        // using 'left join fetch' because it might happen that an owner does not have pets yet
-        Query query = this.em.createQuery("SELECT owner FROM Owner owner left join fetch owner.pets WHERE owner.id =:id");
+        Query query = this.em.createQuery(
+            "SELECT DISTINCT owner FROM Owner owner "
+                + "left join fetch owner.pets pet "
+                + "left join fetch pet.type "
+                + "left join fetch pet.visits "
+                + "WHERE owner.id = :id");
         query.setParameter("id", id);
         return (Owner) query.getSingleResult();
     }
@@ -84,7 +86,11 @@ public class JpaOwnerRepositoryImpl implements OwnerRepository {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<Owner> findAll() throws DataAccessException {
-		Query query = this.em.createQuery("SELECT owner FROM Owner owner");
+		Query query = this.em.createQuery(
+            "SELECT DISTINCT owner FROM Owner owner "
+                + "left join fetch owner.pets pet "
+                + "left join fetch pet.type "
+                + "left join fetch pet.visits");
         return query.getResultList();
 	}
 
