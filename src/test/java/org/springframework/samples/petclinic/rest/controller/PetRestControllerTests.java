@@ -112,7 +112,7 @@ class PetRestControllerTests {
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
             .andExpect(jsonPath("$.id").value(3))
-            .andExpect(jsonPath("$.name").value("Rosy"));
+            .andExpect(jsonPath("$.name").value("Rosy the Dawg"));
     }
 
     @Test
