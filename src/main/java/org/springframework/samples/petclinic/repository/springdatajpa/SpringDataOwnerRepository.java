@@ -36,14 +36,34 @@ import org.springframework.dao.DataAccessException;
 public interface SpringDataOwnerRepository extends OwnerRepository, Repository<Owner, Integer> {
 
     @Override
-    @Query("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.lastName LIKE :lastName%")
+    @Query("""
+        SELECT DISTINCT owner
+        FROM Owner owner
+        left join fetch owner.pets pet
+        left join fetch pet.type
+        left join fetch pet.visits
+        WHERE owner.lastName LIKE :lastName%
+        """)
     Collection<Owner> findByLastName(@Param("lastName") String lastName);
 
     @Override
-    @Query("SELECT owner FROM Owner owner left join fetch owner.pets WHERE owner.id =:id")
+    @Query("""
+        SELECT DISTINCT owner
+        FROM Owner owner
+        left join fetch owner.pets pet
+        left join fetch pet.type
+        left join fetch pet.visits
+        WHERE owner.id = :id
+        """)
     Owner findById(@Param("id") int id);
 
     @Override
-    @Query("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets p left join fetch p.type")
+    @Query("""
+        SELECT DISTINCT owner
+        FROM Owner owner
+        left join fetch owner.pets pet
+        left join fetch pet.type
+        left join fetch pet.visits
+        """)
     Collection<Owner> findAll() throws DataAccessException;
 }

@@ -50,7 +50,8 @@ public class JpaVetRepositoryImpl implements VetRepository {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<Vet> findAll() throws DataAccessException {
-		return this.em.createQuery("SELECT vet FROM Vet vet").getResultList();
+		return this.em.createQuery(
+			"SELECT DISTINCT vet FROM Vet vet left join fetch vet.specialties").getResultList();
 	}
 
 	@Override
