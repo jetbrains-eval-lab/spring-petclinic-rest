@@ -18,6 +18,7 @@ package org.springframework.samples.petclinic.rest.advice;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +60,21 @@ public class ExceptionControllerAdvice {
         detail.setDetail(ex.getLocalizedMessage());
         detail.setProperty("timestamp", Instant.now());
         return detail;
+    }
+
+    /**
+     * Handles {@link AccessDeniedException} by returning a 403 Forbidden status.
+     *
+     * @param e The {@link AccessDeniedException} to be handled
+     * @param request {@link HttpServletRequest} object referring to the current request.
+     * @return A {@link ResponseEntity} containing the error information and a 403 Forbidden status
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseBody
+    public ResponseEntity<ProblemDetail> handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        ProblemDetail detail = this.detailBuild(e, status, request.getRequestURL());
+        return ResponseEntity.status(status).body(detail);
     }
 
     /**

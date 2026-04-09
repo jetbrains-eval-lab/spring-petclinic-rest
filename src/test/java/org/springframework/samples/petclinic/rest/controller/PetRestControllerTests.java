@@ -219,4 +219,12 @@ class PetRestControllerTests {
             .andExpect(status().isNotFound());
     }
 
+    @Test
+    @WithMockUser(roles = "USER")
+    void testGetPetForbiddenForNonAdmin() throws Exception {
+        this.mockMvc.perform(get("/api/pets/1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
 }

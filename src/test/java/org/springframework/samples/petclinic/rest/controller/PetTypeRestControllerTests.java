@@ -250,4 +250,12 @@ class PetTypeRestControllerTests {
         	.andExpect(status().isNotFound());
     }
 
+    @Test
+    @WithMockUser(roles="USER")
+    void testGetPetTypeForbiddenForNonAdmin() throws Exception {
+    	this.mockMvc.perform(get("/api/pettypes/1")
+    		.accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
 }

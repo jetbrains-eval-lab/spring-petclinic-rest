@@ -2,12 +2,30 @@ package org.springframework.samples.petclinic.security;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.springframework.samples.petclinic.model.Role;
 import org.springframework.samples.petclinic.model.User;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OAuth2UserMapper {
+
+    /**
+     * Maps database roles to Spring Security GrantedAuthorities.
+     */
+    public Set<GrantedAuthority> mapToAuthorities(Set<Role> roles) {
+        if (roles == null) {
+            return Set.of();
+        }
+        return roles.stream()
+            .map(Role::getName)
+            .map(SimpleGrantedAuthority::new)
+            .collect(Collectors.toSet());
+    }
 
     /**
      * Maps OAuth2 attributes to a PetClinic User entity.
