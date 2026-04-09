@@ -44,18 +44,21 @@ class UserRestControllerTests {
             .setControllerAdvice(new ExceptionControllerAdvice()).build();
     }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void testCreateUserSuccess() throws Exception {
+    private String createValidUserJSON() throws Exception {
         User user = new User();
         user.setUsername("username");
         user.setPassword("password");
         user.setEnabled(true);
         user.addRole("OWNER_ADMIN");
         ObjectMapper mapper = new ObjectMapper();
-        String newVetAsJSON = mapper.writeValueAsString(userMapper.toUserDto(user));
+        return mapper.writeValueAsString(userMapper.toUserDto(user));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void testCreateUserSuccess() throws Exception {
         this.mockMvc.perform(post("/api/users")
-            .content(newVetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
+            .content(createValidUserJSON()).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isCreated());
     }
 
@@ -71,5 +74,13 @@ class UserRestControllerTests {
         this.mockMvc.perform(post("/api/users")
             .content(newVetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void testCreateUserForbiddenForNonAdmin() throws Exception {
+        this.mockMvc.perform(post("/api/users")
+                .content(createValidUserJSON()).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isForbidden());
     }
 }

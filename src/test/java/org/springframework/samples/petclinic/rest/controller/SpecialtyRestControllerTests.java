@@ -215,4 +215,12 @@ class SpecialtyRestControllerTests {
     		.content(newSpecialtyAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
         	.andExpect(status().isNotFound());
     }
+
+    @Test
+    @WithMockUser(roles="USER")
+    void testGetSpecialtyForbiddenForNonAdmin() throws Exception {
+    	this.mockMvc.perform(get("/api/specialties/1")
+    		.accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
 }

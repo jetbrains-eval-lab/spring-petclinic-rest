@@ -492,4 +492,12 @@ class OwnerRestControllerTests {
             .andExpect(status().isNotFound());
     }
 
+    @Test
+    @WithMockUser(roles = "USER")
+    void testListOwnersForbiddenForNonAdmin() throws Exception {
+        this.mockMvc.perform(get("/api/owners")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
 }

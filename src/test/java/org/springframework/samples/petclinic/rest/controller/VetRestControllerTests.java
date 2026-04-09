@@ -208,6 +208,15 @@ class VetRestControllerTests {
     }
 
     @Test
+    @WithMockUser(roles="USER")
+    void testGetAllVetsForbiddenForNonAdmin() throws Exception {
+    	given(this.clinicService.findAllVets()).willReturn(vets);
+        this.mockMvc.perform(get("/api/vets")
+        	.accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
     @WithMockUser(roles="VET_ADMIN")
     void testDeleteVetError() throws Exception {
     	Vet newVet = vets.get(0);
