@@ -72,7 +72,8 @@ class OAuth2IntegrationTests {
                         attrs.put("family_name", "Doe");
                     })))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.username").value("john@example.com"));
+            .andExpect(jsonPath("$.authenticated").value(true))
+            .andExpect(jsonPath("$.user.username").value("john@example.com"));
     }
 
     @Test
