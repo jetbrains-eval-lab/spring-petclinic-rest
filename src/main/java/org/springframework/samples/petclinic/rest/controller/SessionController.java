@@ -40,9 +40,13 @@ public class SessionController {
         }
 
         if (userInfo == null) {
-            return ResponseEntity.notFound().build();
+            throw new org.springframework.security.authentication.InsufficientAuthenticationException("User not authenticated");
         }
-        return ResponseEntity.ok(userInfo);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("authenticated", true);
+        response.put("user", userInfo);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/attributes/{key}")
@@ -95,7 +99,13 @@ public class SessionController {
         }
         info.put("roles", authentication.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
+            .map(role -> role.startsWith("ROLE_") ? role.substring(5) : role)
             .collect(Collectors.toList()));
+        
+        if (authentication instanceof org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken token) {
+            info.put("provider", token.getAuthorizedClientRegistrationId());
+        }
+        
         return info;
     }
 }

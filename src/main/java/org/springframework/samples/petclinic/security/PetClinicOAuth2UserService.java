@@ -4,13 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.samples.petclinic.model.Role;
 import org.springframework.samples.petclinic.model.User;
 import org.springframework.samples.petclinic.repository.UserRepository;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +41,22 @@ public class PetClinicOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String provider = userRequest.getClientRegistration().getRegistrationId();
         processOAuth2User(oAuth2User.getAttributes(), provider);
+        
+        // Load user from database to get official roles
+        String username = (String) oAuth2User.getAttributes().get(userRequest.getClientRegistration()
+            .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName());
+        
+        Optional<User> dbUser = userRepository.findByUsername(username);
+        if (dbUser.isPresent()) {
+            Set<GrantedAuthority> authorities = dbUser.get().getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toSet());
+            
+            // Re-wrap the user with merged authorities
+            return new DefaultOAuth2User(authorities, oAuth2User.getAttributes(), 
+                userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName());
+        }
+        
         return oAuth2User;
     }
 

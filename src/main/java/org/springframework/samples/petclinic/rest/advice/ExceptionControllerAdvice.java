@@ -70,7 +70,10 @@ public class ExceptionControllerAdvice {
      */
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public ResponseEntity<ProblemDetail> handleGeneralException(Exception e, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleGeneralException(Exception e, HttpServletRequest request) throws Exception {
+        if (e instanceof org.springframework.security.core.AuthenticationException || e instanceof org.springframework.security.access.AccessDeniedException) {
+            throw e;
+        }
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         ProblemDetail detail = this.detailBuild(e, status, request.getRequestURL());
         return ResponseEntity.status(status).body(detail);

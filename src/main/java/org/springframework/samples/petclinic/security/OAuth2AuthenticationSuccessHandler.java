@@ -51,7 +51,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         userInfo.put("pictureUrl", attrs.get("picture"));
         userInfo.put("roles", authentication.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
+            .map(role -> role.startsWith("ROLE_") ? role.substring(5) : role)
             .collect(Collectors.toList()));
+        
+        if (authentication instanceof org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken token) {
+            userInfo.put("provider", token.getAuthorizedClientRegistrationId());
+        }
+        
         return userInfo;
     }
 }
