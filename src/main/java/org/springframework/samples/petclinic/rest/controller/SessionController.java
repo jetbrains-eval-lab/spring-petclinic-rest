@@ -6,8 +6,10 @@ import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpSession;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.security.OAuth2AuthenticationSuccessHandler;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -28,6 +30,7 @@ public class SessionController {
     private static final String RESERVED_KEY = OAuth2AuthenticationSuccessHandler.SESSION_KEY_AUTHENTICATED_USER;
 
     @GetMapping("/user")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, Object>> getUser(HttpSession session, Authentication authentication) {
         @SuppressWarnings("unchecked")
         Map<String, Object> userInfo = (Map<String, Object>) session.getAttribute(RESERVED_KEY);
@@ -40,7 +43,7 @@ public class SessionController {
         }
 
         if (userInfo == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok(userInfo);
     }
