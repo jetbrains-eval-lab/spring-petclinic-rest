@@ -39,10 +39,15 @@ public class SessionController {
             }
         }
 
+        Map<String, Object> response = new HashMap<>();
         if (userInfo == null) {
-            return ResponseEntity.notFound().build();
+            response.put("authenticated", false);
+            return ResponseEntity.ok(response);
         }
-        return ResponseEntity.ok(userInfo);
+
+        response.put("authenticated", true);
+        response.put("user", userInfo);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/attributes/{key}")
