@@ -140,6 +140,28 @@ class OAuth2IntegrationTests {
     }
 
     @Test
+    void testGetSessionUserAfterLogout() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+
+        // 1. Authenticate first to establish a session
+        mockMvc.perform(get("/api/session/user")
+                .with(oauth2Login())
+                .session(session))
+            .andExpect(status().isOk());
+
+        // 2. Logout with that session
+        mockMvc.perform(post("/api/auth/logout")
+                .session(session))
+            .andExpect(status().isOk());
+
+        // 3. Immediately call GET /api/session/user again with the now-invalidated session
+        // It should redirect (302) to the OAuth2 login page, NOT return 404
+        mockMvc.perform(get("/api/session/user")
+                .session(session))
+            .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
     void testSessionPersistenceAcrossRequests() throws Exception {
         MockHttpSession session = new MockHttpSession();
 

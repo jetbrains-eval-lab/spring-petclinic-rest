@@ -49,7 +49,7 @@ public class OAuth2SecurityConfig {
             )
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) ->
-                    response.sendRedirect("/oauth2/authorization/" + provider)
+                    response.sendRedirect(request.getContextPath() + "/oauth2/authorization/" + provider)
                 )
             );
         return http.build();
