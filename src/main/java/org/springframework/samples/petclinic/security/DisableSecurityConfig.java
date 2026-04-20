@@ -13,6 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
  */
 @Configuration
 @ConditionalOnProperty(name = "petclinic.security.enable", havingValue = "false")
+@ConditionalOnProperty(name = "petclinic.security.oauth2.enable", havingValue = "false", matchIfMissing = true)
 public class DisableSecurityConfig {
 
     @Bean
