@@ -61,7 +61,7 @@ public class VisitRestController implements VisitsApi {
         return new ResponseEntity<>(new ArrayList<>(visitMapper.toVisitsDto(visits)), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
+    @PreAuthorize("hasRole(@roles.OWNER_ADMIN) or @ownerAuthz.isVisitOwner(#visitId, authentication)")
     @Override
     public ResponseEntity<VisitDto> getVisit( Integer visitId) {
         Visit visit = this.clinicService.findVisitById(visitId);
@@ -82,7 +82,7 @@ public class VisitRestController implements VisitsApi {
         return new ResponseEntity<>(visitDto, headers, HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
+    @PreAuthorize("hasRole(@roles.OWNER_ADMIN) or @ownerAuthz.isVisitOwner(#visitId, authentication)")
     @Override
     public ResponseEntity<VisitDto> updateVisit(Integer visitId, VisitDto visitDto) {
         Visit currentVisit = this.clinicService.findVisitById(visitId);

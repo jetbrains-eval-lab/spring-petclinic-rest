@@ -65,13 +65,31 @@ INSERT INTO visits (pet_id, visit_date, description) VALUES
 (8, '2013-01-02', 'rabies shot'),
 (8, '2013-01-03', 'neutered'),
 (7, '2013-01-04', 'spayed');
-
--- Insert Admin User
+-- Insert Users
 INSERT INTO users (username, password, enabled) VALUES
-('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
+('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE),
+('owner1', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE),
+('owner2', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE),
+('vet1', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE),
+('vet2', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE),
+('user1', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
 
--- Assign Roles to Admin
+-- Assign Roles
 INSERT INTO roles (username, role) VALUES 
 ('admin', 'ROLE_OWNER_ADMIN'),
 ('admin', 'ROLE_VET_ADMIN'),
-('admin', 'ROLE_ADMIN');
+('admin', 'ROLE_ADMIN'),
+('owner1', 'ROLE_OWNER'),
+('owner2', 'ROLE_OWNER'),
+('vet1', 'ROLE_VET'),
+('vet2', 'ROLE_VET'),
+('user1', 'ROLE_USER');
+
+-- Link Owners to Users
+UPDATE owners SET username = 'owner1' WHERE id = 1;
+UPDATE owners SET username = 'owner2' WHERE id = 2;
+
+-- Link Vets to Users
+UPDATE vets SET username = 'vet1' WHERE id = 1;
+UPDATE vets SET username = 'vet2' WHERE id = 2;
+

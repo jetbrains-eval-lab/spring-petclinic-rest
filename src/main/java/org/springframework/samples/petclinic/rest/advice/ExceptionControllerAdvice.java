@@ -30,13 +30,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.net.URI;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Global Exception handler for REST controllers.
  * <p>
  * This class handles exceptions thrown by REST controllers and returns appropriate HTTP responses to the client.
+ * <p>
+ * Note: Security exceptions (AccessDeniedException, AuthorizationDeniedException) are handled by
+ * {@link SecurityExceptionAdvice}.
  *
  * @author Vitaliy Fedoriv
  * @author Alexander Dudkin

@@ -51,10 +51,25 @@ INSERT INTO visits (pet_id, visit_date, description) SELECT 7, '2010-03-04', 'ra
 INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2011-03-04', 'rabies shot' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=2);
 INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2009-06-04', 'neutered' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=3);
 INSERT INTO visits (pet_id, visit_date, description) SELECT 7, '2008-09-04', 'spayed' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=4);
-
 INSERT INTO users(username, password, enabled) VALUES
-('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
+('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE),
+('owner1', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE),
+('owner2', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE),
+('vet1', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE),
+('vet2', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE),
+('user1', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
 
 INSERT INTO roles (username, role) SELECT 'admin', 'ROLE_OWNER_ADMIN' WHERE NOT EXISTS (SELECT * FROM roles WHERE id=1);
 INSERT INTO roles (username, role) SELECT 'admin', 'ROLE_VET_ADMIN' WHERE NOT EXISTS (SELECT * FROM roles WHERE id=2);
-INSERT INTO roles (username, role) SELECT'admin', 'ROLE_ADMIN' WHERE NOT EXISTS (SELECT * FROM roles WHERE id=3);
+INSERT INTO roles (username, role) SELECT 'admin', 'ROLE_ADMIN' WHERE NOT EXISTS (SELECT * FROM roles WHERE id=3);
+INSERT INTO roles (username, role) SELECT 'owner1', 'ROLE_OWNER' WHERE NOT EXISTS (SELECT * FROM roles WHERE username='owner1');
+INSERT INTO roles (username, role) SELECT 'owner2', 'ROLE_OWNER' WHERE NOT EXISTS (SELECT * FROM roles WHERE username='owner2');
+INSERT INTO roles (username, role) SELECT 'vet1', 'ROLE_VET' WHERE NOT EXISTS (SELECT * FROM roles WHERE username='vet1');
+INSERT INTO roles (username, role) SELECT 'vet2', 'ROLE_VET' WHERE NOT EXISTS (SELECT * FROM roles WHERE username='vet2');
+INSERT INTO roles (username, role) SELECT 'user1', 'ROLE_USER' WHERE NOT EXISTS (SELECT * FROM roles WHERE username='user1');
+
+UPDATE owners SET username = 'owner1' WHERE id = 1;
+UPDATE owners SET username = 'owner2' WHERE id = 2;
+UPDATE vets SET username = 'vet1' WHERE id = 1;
+UPDATE vets SET username = 'vet2' WHERE id = 2;
+
