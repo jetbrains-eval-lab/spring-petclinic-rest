@@ -21,6 +21,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.samples.petclinic.rest.controller.BindingErrorsResponse;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -111,6 +113,38 @@ public class ExceptionControllerAdvice {
             return ResponseEntity.status(status).body(detail);
         }
         return ResponseEntity.status(status).build();
+    }
+
+    /**
+     * Handles {@link AuthorizationDeniedException} which indicates that the user is not authorized to access the resource.
+     * This method returns a 403 Forbidden status.
+     *
+     * @param ex The {@link AuthorizationDeniedException} to be handled
+     * @param request {@link HttpServletRequest} object referring to the current request.
+     * @return A {@link ResponseEntity} containing the error information and a 403 Forbidden status
+     */
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    @ResponseBody
+    public ResponseEntity<ProblemDetail> handleAuthorizationDeniedException(AuthorizationDeniedException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        ProblemDetail detail = this.detailBuild(ex, status, request.getRequestURL());
+        return ResponseEntity.status(status).body(detail);
+    }
+
+    /**
+     * Handles {@link AccessDeniedException} which indicates that the user is not authorized to access the resource.
+     * This method returns a 403 Forbidden status.
+     *
+     * @param ex The {@link AccessDeniedException} to be handled
+     * @param request {@link HttpServletRequest} object referring to the current request.
+     * @return A {@link ResponseEntity} containing the error information and a 403 Forbidden status
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseBody
+    public ResponseEntity<ProblemDetail> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        ProblemDetail detail = this.detailBuild(ex, status, request.getRequestURL());
+        return ResponseEntity.status(status).body(detail);
     }
 
 }
