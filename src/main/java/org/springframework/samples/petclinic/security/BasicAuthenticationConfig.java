@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.samples.petclinic.config.IpWhitelistProperties;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -31,10 +33,15 @@ public class BasicAuthenticationConfig {
         return new BCryptPasswordEncoder();
     }
 
-
+    @Bean
+    public IpWhitelistFilter ipWhitelistFilter(IpWhitelistProperties ipWhitelistProperties) {
+        return new IpWhitelistFilter(ipWhitelistProperties);
+    }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, IpWhitelistFilter ipWhitelistFilter) throws Exception {
+        // Add the IP whitelist filter before the authentication filter
+        http.addFilterBefore(ipWhitelistFilter, BasicAuthenticationFilter.class);
         // @formatter:off
         http
             .csrf(AbstractHttpConfigurer::disable)
