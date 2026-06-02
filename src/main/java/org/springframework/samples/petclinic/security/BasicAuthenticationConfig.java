@@ -10,13 +10,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.sql.DataSource;
-import java.util.Map;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true) // Enable @PreAuthorize method-level security
@@ -26,12 +24,13 @@ public class BasicAuthenticationConfig {
     @Autowired
     private DataSource dataSource;
 
+    @Autowired
+    private LoginAttemptService loginAttemptService;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,7 +39,11 @@ public class BasicAuthenticationConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests((authz) -> authz
                 .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults());
+            .httpBasic(Customizer.withDefaults())
+            .addFilterBefore(
+                new LoginAttemptFilter(loginAttemptService),
+                UsernamePasswordAuthenticationFilter.class
+            );
         // @formatter:on
         return http.build();
     }
