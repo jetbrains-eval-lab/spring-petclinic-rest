@@ -6,7 +6,9 @@
   "build_system": "maven",
   "expected": {
     "fail_to_pass": [
-      "org.springframework.samples.petclinic.security.CsrfProtectionTests"
+      "org.springframework.samples.petclinic.security.CsrfProtectionTests.testPostRequestWithoutCsrfToken",
+      "org.springframework.samples.petclinic.security.CsrfProtectionTests.testPutRequestWithoutCsrfToken",
+      "org.springframework.samples.petclinic.security.CsrfProtectionTests.testDeleteRequestWithoutCsrfToken"
     ],
     "pass_to_pass": []
   },
