@@ -16,20 +16,29 @@
 
 package org.springframework.samples.petclinic.rest.controller;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.PetMapper;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.rest.api.PetsApi;
 import org.springframework.samples.petclinic.rest.dto.PetDto;
+import org.springframework.samples.petclinic.rest.dto.UploadPetPhoto200ResponseDto;
 import org.springframework.samples.petclinic.service.ClinicService;
+import org.springframework.samples.petclinic.service.PetPhotoService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Vitaliy Fedoriv
@@ -44,9 +53,12 @@ public class PetRestController implements PetsApi {
 
     private final PetMapper petMapper;
 
-    public PetRestController(ClinicService clinicService, PetMapper petMapper) {
+    private final PetPhotoService petPhotoService;
+
+    public PetRestController(ClinicService clinicService, PetMapper petMapper, PetPhotoService petPhotoService) {
         this.clinicService = clinicService;
         this.petMapper = petMapper;
+        this.petPhotoService = petPhotoService;
     }
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
@@ -95,4 +107,65 @@ public class PetRestController implements PetsApi {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
+    @Override
+    public ResponseEntity<UploadPetPhoto200ResponseDto> uploadPetPhoto(Integer petId, MultipartFile photo) {
+        Pet pet = this.clinicService.findPetById(petId);
+        if (pet == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            String photoPath = petPhotoService.storePhoto(petId, photo);
+            pet.setPhotoPath(photoPath);
+            this.clinicService.savePet(pet);
+
+            UploadPetPhoto200ResponseDto response = new UploadPetPhoto200ResponseDto();
+            response.setPhotoPath(photoPath);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
+    @Override
+    public ResponseEntity<Resource> getPetPhoto(Integer petId) {
+        Pet pet = this.clinicService.findPetById(petId);
+        if (pet == null || pet.getPhotoPath() == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            Resource resource = petPhotoService.loadPhoto(petId);
+            return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .body(resource);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
+    @Override
+    public ResponseEntity<Void> deletePetPhoto(Integer petId) {
+        Pet pet = this.clinicService.findPetById(petId);
+        if (pet == null || pet.getPhotoPath() == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            boolean deleted = petPhotoService.deletePhoto(petId);
+            if (deleted) {
+                pet.setPhotoPath(null);
+                this.clinicService.savePet(pet);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
