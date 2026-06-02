@@ -6,9 +6,24 @@
   "build_system": "maven",
   "expected": {
     "fail_to_pass": [
-      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest",
-      "org.springframework.samples.petclinic.cache.CacheScheduledServiceIntegrationTest",
-      "org.springframework.samples.petclinic.rest.controller.CacheManagementRestControllerTests"
+      "org.springframework.samples.petclinic.cache.CacheScheduledServiceIntegrationTest.testDataUpdatedWhenTriggeringScheduledAnnotationBeanPostProcessor",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testCacheCorrectnessOnDeletion(String)[1]",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testCacheCorrectnessOnDeletion(String)[2]",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testCacheCorrectnessOnDeletion(String)[3]",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testCacheCorrectnessOnDeletion(String)[4]",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testCacheCorrectnessOnDeletion(String)[5]",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testCacheCorrectnessOnDeletion(String)[6]",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testClearAllCaches(String)[1]",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testClearAllCaches(String)[2]",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testClearAllCaches(String)[3]",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testClearAllCaches(String)[4]",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testClearAllCaches(String)[5]",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTest.testClearAllCaches(String)[6]",
+      "org.springframework.samples.petclinic.rest.controller.CacheManagementRestControllerTests.testClearAllCaches_EmptyCaches",
+      "org.springframework.samples.petclinic.rest.controller.CacheManagementRestControllerTests.testClearAllCaches_ExceptionHandling",
+      "org.springframework.samples.petclinic.rest.controller.CacheManagementRestControllerTests.testClearAllCaches_Success",
+      "org.springframework.samples.petclinic.rest.controller.CacheManagementRestControllerTests.testClearAllCaches_VerifyCacheInvalidation",
+      "org.springframework.samples.petclinic.rest.controller.CacheManagementRestControllerTests.testClearAllCaches_WithPopulatedCache"
     ],
     "pass_to_pass": []
   },
