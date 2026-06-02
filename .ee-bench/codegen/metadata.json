@@ -6,7 +6,7 @@
   "build_system": "maven",
   "expected": {
     "fail_to_pass": [
-      "org.springframework.samples.petclinic.security.IpWhitelistIntegrationTest"
+      "org.springframework.samples.petclinic.security.IpWhitelistIntegrationTest.shouldDenyAccessFromNonWhitelistedIp"
     ],
     "pass_to_pass": []
   },
