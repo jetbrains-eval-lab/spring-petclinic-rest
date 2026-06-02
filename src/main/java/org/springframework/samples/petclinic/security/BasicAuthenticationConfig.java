@@ -9,11 +9,13 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.samples.petclinic.security.sso.SsoAuthenticationProvider;
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -31,8 +33,6 @@ public class BasicAuthenticationConfig {
         return new BCryptPasswordEncoder();
     }
 
-
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // @formatter:off
@@ -46,13 +46,8 @@ public class BasicAuthenticationConfig {
     }
 
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        // @formatter:off
-        auth
-            .jdbcAuthentication()
-                .dataSource(dataSource)
-                .usersByUsernameQuery("select username,password,enabled from users where username=?")
-                .authoritiesByUsernameQuery("select username,role from roles where username=?");
-        // @formatter:on
+    public void configureGlobal(AuthenticationManagerBuilder auth, SsoAuthenticationProvider ssoAuthenticationProvider) throws Exception {
+        // Register SSO Authentication Provider first (primary authentication method)
+        auth.authenticationProvider(ssoAuthenticationProvider);
     }
 }
