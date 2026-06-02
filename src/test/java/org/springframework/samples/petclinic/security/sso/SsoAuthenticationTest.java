@@ -40,6 +40,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 @Import({SsoAuthenticationTest.MockSsoControllerTestConfig.class, SsoAuthenticationTest.MockSsoController.class})
 @TestPropertySource(properties = {
     "petclinic.security.sso.url=http://localhost:8087/petclinic/mock-sso/auth",
+    "petclinic.security.sso.enabled=true",
     "server.port=8087",
     "petclinic.security.enable=true"
 })

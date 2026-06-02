@@ -6,7 +6,10 @@
   "build_system": "maven",
   "expected": {
     "fail_to_pass": [
-      "org.springframework.samples.petclinic.security.sso.SsoAuthenticationTest"
+      "org.springframework.samples.petclinic.security.sso.SsoAuthenticationTest.testSuccessfulSsoAuthentication",
+      "org.springframework.samples.petclinic.security.sso.SsoAuthenticationTest.testRoleMapping",
+      "org.springframework.samples.petclinic.security.sso.SsoAuthenticationTest.testRoleMappingWithoutRolePrefix",
+      "org.springframework.samples.petclinic.security.sso.SsoAuthenticationTest.testSsoServiceUnavailable"
     ],
     "pass_to_pass": []
   },

@@ -2,9 +2,11 @@ package org.springframework.samples.petclinic.security.sso;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@ConditionalOnProperty(name = {"petclinic.security.enable", "petclinic.security.sso.enabled"}, havingValue = "true")
 public class SsoAuthenticationProvider implements AuthenticationProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(SsoAuthenticationProvider.class);
@@ -47,9 +50,8 @@ public class SsoAuthenticationProvider implements AuthenticationProvider {
             throw e;
         }
         catch (SsoAuthenticationException e) {
-            // SSO service unavailable or other SSO-specific error
-            logger.warn("SSO authentication failed, falling back to local authentication: {}", e.getMessage());
-            throw new AuthenticationServiceException("SSO authentication failed", e);
+            logger.warn("SSO authentication failed: {}", e.getMessage());
+            throw new InternalAuthenticationServiceException("SSO authentication failed", e);
         } catch (Exception e) {
             logger.error("Unexpected error during SSO authentication", e);
             throw new AuthenticationServiceException("Authentication failed due to an internal error", e);

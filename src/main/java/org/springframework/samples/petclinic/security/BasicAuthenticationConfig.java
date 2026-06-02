@@ -1,6 +1,7 @@
 package org.springframework.samples.petclinic.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +10,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
@@ -46,8 +46,16 @@ public class BasicAuthenticationConfig {
     }
 
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth, SsoAuthenticationProvider ssoAuthenticationProvider) throws Exception {
-        // Register SSO Authentication Provider first (primary authentication method)
-        auth.authenticationProvider(ssoAuthenticationProvider);
+    public void configureGlobal(AuthenticationManagerBuilder auth,
+                                ObjectProvider<SsoAuthenticationProvider> ssoAuthenticationProvider) throws Exception {
+        ssoAuthenticationProvider.ifAvailable(auth::authenticationProvider);
+
+        // @formatter:off
+        auth
+            .jdbcAuthentication()
+                .dataSource(dataSource)
+                .usersByUsernameQuery("select username,password,enabled from users where username=?")
+                .authoritiesByUsernameQuery("select username,role from roles where username=?");
+        // @formatter:on
     }
 }

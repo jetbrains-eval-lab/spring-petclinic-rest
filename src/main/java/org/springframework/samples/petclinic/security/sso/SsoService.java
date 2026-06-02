@@ -3,6 +3,7 @@ package org.springframework.samples.petclinic.security.sso;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,17 +20,18 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@ConditionalOnProperty(name = {"petclinic.security.enable", "petclinic.security.sso.enabled"}, havingValue = "true")
 public class SsoService {
 
     private static final Logger logger = LoggerFactory.getLogger(SsoService.class);
 
-    @Value("${petclinic.security.sso.url}")
-    private String ssoApiUrl;
-
+    private final String ssoApiUrl;
     private final RestTemplate restTemplate;
 
     public SsoService(RestTemplateBuilder restTemplateBuilder,
+                      @Value("${petclinic.security.sso.url}") String ssoApiUrl,
                       @Value("${petclinic.security.sso.timeout:5000}") int ssoTimeout) {
+        this.ssoApiUrl = ssoApiUrl;
         this.restTemplate = restTemplateBuilder
             .connectTimeout(Duration.ofMillis(ssoTimeout))
             .readTimeout(Duration.ofMillis(ssoTimeout))
