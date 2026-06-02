@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS users (
   username VARCHAR(20) NOT NULL ,
   password VARCHAR(60) NOT NULL ,
   enabled boolean NOT NULL DEFAULT true ,
+  tenant_id VARCHAR(50) ,
   CONSTRAINT pk_users PRIMARY KEY (username)
 );
 
