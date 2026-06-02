@@ -33,6 +33,8 @@ _run_tests() {
   python3 "$EVAL_DIR/scripts/ee_bench_parser_junit.py" "$ARTIFACTS_DIR" > "/tmp/${label}_parser.json" 2>/dev/null || echo '{}' > "/tmp/${label}_parser.json"
 
   export ARTIFACTS_DIR="$orig_artifacts"
+  # Keep errexit disabled so callers can capture expected test failures.
+  set +e
   return "$exit_code"
 }
 
