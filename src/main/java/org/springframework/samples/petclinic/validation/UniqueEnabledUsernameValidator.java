@@ -14,12 +14,8 @@ import jakarta.validation.ConstraintValidatorContext;
 @Component
 public class UniqueEnabledUsernameValidator implements ConstraintValidator<UniqueEnabledUsername, String> {
 
-    private final UserRepository userRepository;
-
-    @Autowired
-    public UniqueEnabledUsernameValidator(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    @Autowired(required = false)
+    private UserRepository userRepository;
 
     @Override
     public void initialize(UniqueEnabledUsername constraintAnnotation) {
@@ -30,6 +26,11 @@ public class UniqueEnabledUsernameValidator implements ConstraintValidator<Uniqu
     public boolean isValid(String username, ConstraintValidatorContext context) {
         // Skip validation for null or empty values (let @NotNull or @NotEmpty handle those)
         if (username == null || username.isEmpty()) {
+            return true;
+        }
+
+        // Hibernate may instantiate entity validators outside Spring during persistence callbacks.
+        if (userRepository == null) {
             return true;
         }
 

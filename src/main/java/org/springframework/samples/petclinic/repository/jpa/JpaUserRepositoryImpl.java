@@ -30,6 +30,9 @@ public class JpaUserRepositoryImpl implements UserRepository {
         return this.em.createQuery("SELECT u FROM User u WHERE u.username = :username AND u.enabled = :enabled", User.class)
             .setParameter("username", username)
             .setParameter("enabled", true)
-            .getSingleResult();
+            .setMaxResults(1)
+            .getResultStream()
+            .findFirst()
+            .orElse(null);
     }
 }

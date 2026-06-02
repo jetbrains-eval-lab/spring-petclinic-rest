@@ -1,5 +1,7 @@
 package org.springframework.samples.petclinic.service.userService;
 
+import java.util.Locale;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
@@ -23,7 +25,10 @@ public abstract class AbstractUserServiceTests {
     @Test
     public void shouldAddUser() throws Exception {
         User user = new User();
-        user.setUsername("username");
+        user.setUsername("user-" + getClass().getSimpleName()
+            .replace("UserService", "")
+            .replace("Tests", "")
+            .toLowerCase(Locale.ROOT));
         user.setPassword("password");
         user.setEnabled(true);
         user.addRole("OWNER_ADMIN");
