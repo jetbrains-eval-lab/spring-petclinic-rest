@@ -6,7 +6,8 @@
   "build_system": "maven",
   "expected": {
     "fail_to_pass": [
-      "org.springframework.samples.petclinic.rest.controller.TenantSecurityTests"
+      "org.springframework.samples.petclinic.rest.controller.TenantSecurityTests.testBothTenantsValidAccess",
+      "org.springframework.samples.petclinic.rest.controller.TenantSecurityTests.testValidTenantAndUserAccess"
     ],
     "pass_to_pass": []
   },

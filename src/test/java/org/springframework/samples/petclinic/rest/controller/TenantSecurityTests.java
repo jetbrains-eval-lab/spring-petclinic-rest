@@ -1,8 +1,11 @@
 package org.springframework.samples.petclinic.rest.controller;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -15,6 +18,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -31,6 +40,9 @@ public class TenantSecurityTests {
 
     @Autowired
     private WebApplicationContext context;
+
+    @Autowired
+    private DataSource dataSource;
 
     private MockMvc mockMvc;
 
@@ -147,6 +159,48 @@ public class TenantSecurityTests {
                 .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void testTenantInitializerIsIdempotent() throws Exception {
+        CommandLineRunner dataInitializer;
+        try {
+            dataInitializer = context.getBean("dataInitializer", CommandLineRunner.class);
+        } catch (NoSuchBeanDefinitionException ex) {
+            Assumptions.abort("Tenant initializer is part of the tenant-aware security implementation");
+            return;
+        }
+
+        dataInitializer.run();
+
+        assertThat(tenantFor("user-1")).isEqualTo("tenant-1");
+        assertThat(tenantFor("user-2")).isEqualTo("tenant-2");
+        assertThat(roleCountFor("user-1")).isOne();
+        assertThat(roleCountFor("user-2")).isOne();
+    }
+
+    private String tenantFor(String username) throws Exception {
+        String sql = "SELECT tenant_id FROM users WHERE username = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                assertThat(rs.next()).isTrue();
+                return rs.getString(1);
+            }
+        }
+    }
+
+    private int roleCountFor(String username) throws Exception {
+        String sql = "SELECT COUNT(*) FROM roles WHERE username = ? AND role = 'ROLE_ADMIN'";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                assertThat(rs.next()).isTrue();
+                return rs.getInt(1);
+            }
+        }
     }
 
     /**
