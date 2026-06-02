@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 /**
  * <p> Integration test using the jpa profile.
@@ -16,6 +17,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles({"jpa", "hsqldb"})
+@TestPropertySource(properties = {
+    "spring.cache.type=none"
+})
 class ClinicServiceJpaTests extends AbstractClinicServiceTests {
 
     @Autowired

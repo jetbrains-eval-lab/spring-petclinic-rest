@@ -17,6 +17,7 @@ package org.springframework.samples.petclinic.service.clinicService;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 /**
  * <p> Integration test using the jdbc profile.
@@ -27,6 +28,9 @@ import org.springframework.test.context.ActiveProfiles;
  */
 @SpringBootTest
 @ActiveProfiles({"jdbc", "hsqldb"})
+@TestPropertySource(properties = {
+    "spring.cache.type=none"
+})
 class ClinicServiceJdbcTests extends AbstractClinicServiceTests {
 
 }

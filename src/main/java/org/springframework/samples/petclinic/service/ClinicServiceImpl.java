@@ -16,13 +16,20 @@
 package org.springframework.samples.petclinic.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.orm.ObjectRetrievalFailureException;
+import org.springframework.samples.petclinic.cache.CacheManagementService;
+import org.springframework.samples.petclinic.config.CacheConfig;
 import org.springframework.samples.petclinic.model.*;
 import org.springframework.samples.petclinic.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,12 +46,15 @@ import java.util.function.Supplier;
 @Service
 public class ClinicServiceImpl implements ClinicService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ClinicServiceImpl.class);
+
     private final PetRepository petRepository;
     private final VetRepository vetRepository;
     private final OwnerRepository ownerRepository;
     private final VisitRepository visitRepository;
     private final SpecialtyRepository specialtyRepository;
     private final PetTypeRepository petTypeRepository;
+    private final CacheManagementService cacheManagementService;
 
     @Autowired
     public ClinicServiceImpl(
@@ -53,149 +63,204 @@ public class ClinicServiceImpl implements ClinicService {
         OwnerRepository ownerRepository,
         VisitRepository visitRepository,
         SpecialtyRepository specialtyRepository,
-        PetTypeRepository petTypeRepository) {
+        PetTypeRepository petTypeRepository,
+        CacheManagementService cacheManagementService) {
         this.petRepository = petRepository;
         this.vetRepository = vetRepository;
         this.ownerRepository = ownerRepository;
         this.visitRepository = visitRepository;
         this.specialtyRepository = specialtyRepository;
         this.petTypeRepository = petTypeRepository;
+        this.cacheManagementService = cacheManagementService;
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.PETS_CACHE, key = "'allPets'")
     public Collection<Pet> findAllPets() throws DataAccessException {
         return petRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.PETS_CACHE, key = "#pet.id", condition = "#pet.id != null"),
+        @CacheEvict(value = CacheConfig.PETS_CACHE, key = "'allPets'")
+    })
     public void deletePet(Pet pet) throws DataAccessException {
         petRepository.delete(pet);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.VISITS_CACHE, key = "#visitId", unless = "#result == null")
     public Visit findVisitById(int visitId) throws DataAccessException {
         return findEntityById(() -> visitRepository.findById(visitId));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.VISITS_CACHE, key = "'allVisits'")
     public Collection<Visit> findAllVisits() throws DataAccessException {
         return visitRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.VISITS_CACHE, key = "#visit.id", condition = "#visit.id != null"),
+        @CacheEvict(value = CacheConfig.VISITS_CACHE, key = "'allVisits'")
+    })
     public void deleteVisit(Visit visit) throws DataAccessException {
         visitRepository.delete(visit);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.VETS_CACHE, key = "#id", unless = "#result == null")
     public Vet findVetById(int id) throws DataAccessException {
         return findEntityById(() -> vetRepository.findById(id));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.VETS_CACHE, key = "'allVets'")
     public Collection<Vet> findAllVets() throws DataAccessException {
         return vetRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.VETS_CACHE, key = "#vet.id", condition = "#vet.id != null"),
+        @CacheEvict(value = CacheConfig.VETS_CACHE, key = "'allVets'")
+    })
     public void saveVet(Vet vet) throws DataAccessException {
         vetRepository.save(vet);
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.VETS_CACHE, key = "#vet.id", condition = "#vet.id != null"),
+        @CacheEvict(value = CacheConfig.VETS_CACHE, key = "'allVets'")
+    })
     public void deleteVet(Vet vet) throws DataAccessException {
         vetRepository.delete(vet);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.OWNERS_CACHE, key = "'allOwners'")
     public Collection<Owner> findAllOwners() throws DataAccessException {
         return ownerRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.OWNERS_CACHE, key = "#owner.id", condition = "#owner.id != null"),
+        @CacheEvict(value = CacheConfig.OWNERS_CACHE, key = "'allOwners'")
+    })
     public void deleteOwner(Owner owner) throws DataAccessException {
         ownerRepository.delete(owner);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.PET_TYPES_CACHE, key = "#petTypeId", unless = "#result == null")
     public PetType findPetTypeById(int petTypeId) {
         return findEntityById(() -> petTypeRepository.findById(petTypeId));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.PET_TYPES_CACHE, key = "'allPetTypes'")
     public Collection<PetType> findAllPetTypes() throws DataAccessException {
         return petTypeRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.PET_TYPES_CACHE, key = "#petType.id", condition = "#petType.id != null"),
+        @CacheEvict(value = CacheConfig.PET_TYPES_CACHE, key = "'allPetTypes'")
+    })
     public void savePetType(PetType petType) throws DataAccessException {
         petTypeRepository.save(petType);
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.PET_TYPES_CACHE, key = "#petType.id", condition = "#petType.id != null"),
+        @CacheEvict(value = CacheConfig.PET_TYPES_CACHE, key = "'allPetTypes'")
+    })
     public void deletePetType(PetType petType) throws DataAccessException {
         petTypeRepository.delete(petType);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.SPECIALTIES_CACHE, key = "#specialtyId", unless = "#result == null")
     public Specialty findSpecialtyById(int specialtyId) {
         return findEntityById(() -> specialtyRepository.findById(specialtyId));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.SPECIALTIES_CACHE, key = "'allSpecialties'")
     public Collection<Specialty> findAllSpecialties() throws DataAccessException {
         return specialtyRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.SPECIALTIES_CACHE, key = "#specialty.id", condition = "#specialty.id != null"),
+        @CacheEvict(value = CacheConfig.SPECIALTIES_CACHE, key = "'allSpecialties'")
+    })
     public void saveSpecialty(Specialty specialty) throws DataAccessException {
         specialtyRepository.save(specialty);
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.SPECIALTIES_CACHE, key = "#specialty.id", condition = "#specialty.id != null"),
+        @CacheEvict(value = CacheConfig.SPECIALTIES_CACHE, key = "'allSpecialties'")
+    })
     public void deleteSpecialty(Specialty specialty) throws DataAccessException {
         specialtyRepository.delete(specialty);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.PET_TYPES_CACHE, key = "'allPetTypes'")
     public Collection<PetType> findPetTypes() throws DataAccessException {
         return petRepository.findPetTypes();
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.OWNERS_CACHE, key = "#id", unless = "#result == null")
     public Owner findOwnerById(int id) throws DataAccessException {
         return findEntityById(() -> ownerRepository.findById(id));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.PETS_CACHE, key = "#id", unless = "#result == null")
     public Pet findPetById(int id) throws DataAccessException {
         return findEntityById(() -> petRepository.findById(id));
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.PETS_CACHE, key = "#pet.id", condition = "#pet.id != null"),
+        @CacheEvict(value = CacheConfig.PETS_CACHE, key = "'allPets'")
+    })
     public void savePet(Pet pet) throws DataAccessException {
         pet.setType(findPetTypeById(pet.getType().getId()));
         petRepository.save(pet);
@@ -203,22 +268,29 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.VISITS_CACHE, key = "#visit.id", condition = "#visit.id != null"),
+        @CacheEvict(value = CacheConfig.VISITS_CACHE, key = "'allVisits'")
+    })
     public void saveVisit(Visit visit) throws DataAccessException {
         visitRepository.save(visit);
-
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.VETS_CACHE, key = "'allVets'")
     public Collection<Vet> findVets() throws DataAccessException {
         return vetRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfig.OWNERS_CACHE, key = "#owner.id", condition = "#owner.id != null"),
+        @CacheEvict(value = CacheConfig.OWNERS_CACHE, key = "'allOwners'")
+    })
     public void saveOwner(Owner owner) throws DataAccessException {
         ownerRepository.save(owner);
-
     }
 
     @Override
@@ -247,5 +319,4 @@ public class ClinicServiceImpl implements ClinicService {
             return null;
         }
     }
-
 }
