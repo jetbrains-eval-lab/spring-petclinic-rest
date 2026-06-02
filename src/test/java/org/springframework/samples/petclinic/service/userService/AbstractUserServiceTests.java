@@ -24,7 +24,7 @@ public abstract class AbstractUserServiceTests {
     public void shouldAddUser() throws Exception {
         User user = new User();
         user.setUsername("username");
-        user.setPassword("password");
+        user.setPassword("Password1!");
         user.setEnabled(true);
         user.addRole("OWNER_ADMIN");
 
