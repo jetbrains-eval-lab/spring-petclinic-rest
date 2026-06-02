@@ -5,7 +5,9 @@
   "jvm_version": "21",
   "build_system": "maven",
   "expected": {
-    "fail_to_pass": [],
+    "fail_to_pass": [
+      "org.springframework.samples.petclinic.rest.advice.ExceptionControllerAdviceTests"
+    ],
     "pass_to_pass": []
   },
   "environment": {
