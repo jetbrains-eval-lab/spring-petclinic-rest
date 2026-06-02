@@ -5,7 +5,10 @@
   "jvm_version": "21",
   "build_system": "maven",
   "expected": {
-    "fail_to_pass": [],
+    "fail_to_pass": [
+      "org.springframework.samples.petclinic.cache.CacheEffectivenessTests",
+      "org.springframework.samples.petclinic.cache.GenericEntityCacheIntegrationTests"
+    ],
     "pass_to_pass": []
   },
   "environment": {
