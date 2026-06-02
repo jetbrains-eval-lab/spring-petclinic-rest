@@ -22,26 +22,25 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.model.*;
 import org.springframework.samples.petclinic.repository.*;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,7 +51,6 @@ import static org.mockito.Mockito.*;
  * Tests cover all cached endpoints to verify hybrid cache behavior across all entity types.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
 @TestPropertySource(properties = {
     "petclinic.cache.hybrid.enabled=true",
     "petclinic.security.enable=false",
@@ -62,26 +60,34 @@ import static org.mockito.Mockito.*;
 })
 public class HybridCacheIntegrationTest {
 
-    @Container
-    static GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:7-alpine"))
-            .withExposedPorts(6379)
-            .withReuse(true);
+    private static final String[] CACHE_NAMES = {
+        "vets", "vetById",
+        "owners", "ownerById", "ownersByLastName",
+        "pets", "petById",
+        "petTypes", "petTypeById",
+        "specialties", "specialtyById", "specialtiesByNameIn",
+        "visits", "visitById", "visitsByPetId"
+    };
 
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379).toString());
+    @TestConfiguration
+    static class InMemoryL2CacheConfiguration {
+
+        @Bean("l2CacheManager")
+        CacheManager l2CacheManager() {
+            return new ConcurrentMapCacheManager(CACHE_NAMES);
+        }
     }
 
     @Autowired
     private TestRestTemplate restTemplate;
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
-
-    @Autowired
     @Qualifier("l1CacheManager")
     private CacheManager cacheManager;
+
+    @Autowired
+    @Qualifier("l2CacheManager")
+    private CacheManager l2CacheManager;
 
     @MockitoBean
     private VetRepository vetRepository;
@@ -479,10 +485,9 @@ public class HybridCacheIntegrationTest {
     }
 
     private void clearL2Cache(String cacheName) {
-        // Clear L2 Redis cache for specific cache name
-        Set<String> keys = redisTemplate.keys(cacheName + ":*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
+        Cache cache = l2CacheManager.getCache(cacheName);
+        if (cache != null) {
+            cache.clear();
         }
     }
 
@@ -494,14 +499,14 @@ public class HybridCacheIntegrationTest {
     }
 
     public void clearL2Cache() {
-        // Clear all L2 Redis cache entries
+        // Clear all L2 cache entries
         for (String cacheName : cacheManager.getCacheNames()) {
             clearL2Cache(cacheName);
         }
     }
 
     private Set<String> findL1KeysForCache(String cacheName) {
-        org.springframework.cache.Cache cache = cacheManager.getCache(cacheName);
+        Cache cache = cacheManager.getCache(cacheName);
         if (cache == null) {
             return Collections.emptySet();
         }
@@ -524,8 +529,19 @@ public class HybridCacheIntegrationTest {
     }
 
     private Set<String> findL2KeysForCache(String cacheName) {
-        Set<String> keys = redisTemplate.keys(cacheName + ":*");
-        return keys != null ? keys : Collections.emptySet();
+        Cache cache = l2CacheManager.getCache(cacheName);
+        if (cache == null) {
+            return Collections.emptySet();
+        }
+
+        if (cache instanceof ConcurrentMapCache concurrentMapCache) {
+            ConcurrentMap<Object, Object> nativeCache = concurrentMapCache.getNativeCache();
+            return nativeCache.keySet().stream()
+                .map(Object::toString)
+                .collect(java.util.stream.Collectors.toSet());
+        }
+
+        return Collections.emptySet();
     }
 
     private void clearAllRepositoryInvocations() {
