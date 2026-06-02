@@ -151,7 +151,7 @@ class OwnerRestControllerTests {
     @WithMockUser(roles = "OWNER_ADMIN")
     void testGetOwnerSuccess() throws Exception {
         given(this.clinicService.findOwnerById(1)).willReturn(ownerMapper.toOwner(owners.get(0)));
-        this.mockMvc.perform(get("/api/owners/1")
+        this.mockMvc.perform(get("/api/v1/owners/1")
                 .accept(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -163,7 +163,7 @@ class OwnerRestControllerTests {
     @WithMockUser(roles = "OWNER_ADMIN")
     void testGetOwnerNotFound() throws Exception {
         given(this.clinicService.findOwnerById(2)).willReturn(null);
-        this.mockMvc.perform(get("/api/owners/2")
+        this.mockMvc.perform(get("/api/v1/owners/2")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
     }
@@ -174,7 +174,7 @@ class OwnerRestControllerTests {
         owners.remove(0);
         owners.remove(1);
         given(this.clinicService.findOwnerByLastName("Davis")).willReturn(ownerMapper.toOwners(owners));
-        this.mockMvc.perform(get("/api/owners?lastName=Davis")
+        this.mockMvc.perform(get("/api/v1/owners?lastName=Davis")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -189,7 +189,7 @@ class OwnerRestControllerTests {
     void testGetOwnersListNotFound() throws Exception {
         owners.clear();
         given(this.clinicService.findOwnerByLastName("0")).willReturn(ownerMapper.toOwners(owners));
-        this.mockMvc.perform(get("/api/owners?lastName=0")
+        this.mockMvc.perform(get("/api/v1/owners?lastName=0")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
     }
@@ -200,7 +200,7 @@ class OwnerRestControllerTests {
         owners.remove(0);
         owners.remove(1);
         given(this.clinicService.findAllOwners()).willReturn(ownerMapper.toOwners(owners));
-        this.mockMvc.perform(get("/api/owners")
+        this.mockMvc.perform(get("/api/v1/owners")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -215,7 +215,7 @@ class OwnerRestControllerTests {
     void testGetAllOwnersNotFound() throws Exception {
         owners.clear();
         given(this.clinicService.findAllOwners()).willReturn(ownerMapper.toOwners(owners));
-        this.mockMvc.perform(get("/api/owners")
+        this.mockMvc.perform(get("/api/v1/owners")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
     }
@@ -229,7 +229,7 @@ class OwnerRestControllerTests {
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String newOwnerAsJSON = mapper.writeValueAsString(newOwnerDto);
-        this.mockMvc.perform(post("/api/owners")
+        this.mockMvc.perform(post("/api/v1/owners")
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isCreated());
     }
@@ -244,7 +244,7 @@ class OwnerRestControllerTests {
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String newOwnerAsJSON = mapper.writeValueAsString(newOwnerDto);
-        this.mockMvc.perform(post("/api/owners")
+        this.mockMvc.perform(post("/api/v1/owners")
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
@@ -266,12 +266,12 @@ class OwnerRestControllerTests {
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String newOwnerAsJSON = mapper.writeValueAsString(updatedOwnerDto);
-        this.mockMvc.perform(put("/api/owners/" + ownerId)
+        this.mockMvc.perform(put("/api/v1/owners/" + ownerId)
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(content().contentType("application/json"))
             .andExpect(status().isNoContent());
 
-        this.mockMvc.perform(get("/api/owners/" + ownerId)
+        this.mockMvc.perform(get("/api/v1/owners/" + ownerId)
                 .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -294,12 +294,12 @@ class OwnerRestControllerTests {
         updatedOwnerDto.setTelephone("6085551023");
         ObjectMapper mapper = new ObjectMapper();
         String newOwnerAsJSON = mapper.writeValueAsString(updatedOwnerDto);
-        this.mockMvc.perform(put("/api/owners/" + ownerId)
+        this.mockMvc.perform(put("/api/v1/owners/" + ownerId)
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(content().contentType("application/json"))
             .andExpect(status().isNoContent());
 
-        this.mockMvc.perform(get("/api/owners/" + ownerId)
+        this.mockMvc.perform(get("/api/v1/owners/" + ownerId)
                 .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -316,7 +316,7 @@ class OwnerRestControllerTests {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         String newOwnerAsJSON = mapper.writeValueAsString(newOwnerDto);
-        this.mockMvc.perform(put("/api/owners/1")
+        this.mockMvc.perform(put("/api/v1/owners/1")
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
@@ -330,7 +330,7 @@ class OwnerRestControllerTests {
         String newOwnerAsJSON = mapper.writeValueAsString(newOwnerDto);
         final Owner owner = ownerMapper.toOwner(owners.get(0));
         given(this.clinicService.findOwnerById(1)).willReturn(owner);
-        this.mockMvc.perform(delete("/api/owners/1")
+        this.mockMvc.perform(delete("/api/v1/owners/1")
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isNoContent());
     }
@@ -343,7 +343,7 @@ class OwnerRestControllerTests {
         mapper.registerModule(new JavaTimeModule());
         String newOwnerAsJSON = mapper.writeValueAsString(newOwnerDto);
         given(this.clinicService.findOwnerById(999)).willReturn(null);
-        this.mockMvc.perform(delete("/api/owners/999")
+        this.mockMvc.perform(delete("/api/v1/owners/999")
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isNotFound());
     }
@@ -359,7 +359,7 @@ class OwnerRestControllerTests {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String newPetAsJSON = mapper.writeValueAsString(newPet);
         System.err.println("--> newPetAsJSON=" + newPetAsJSON);
-        this.mockMvc.perform(post("/api/owners/1/pets")
+        this.mockMvc.perform(post("/api/v1/owners/1/pets")
                 .content(newPetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isCreated());
     }
@@ -375,7 +375,7 @@ class OwnerRestControllerTests {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.registerModule(new JavaTimeModule());
         String newPetAsJSON = mapper.writeValueAsString(newPet);
-        this.mockMvc.perform(post("/api/owners/1/pets")
+        this.mockMvc.perform(post("/api/v1/owners/1/pets")
                 .content(newPetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest()).andDo(MockMvcResultHandlers.print());
     }
@@ -390,7 +390,7 @@ class OwnerRestControllerTests {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String newVisitAsJSON = mapper.writeValueAsString(visitMapper.toVisit(newVisit));
         System.out.println("newVisitAsJSON " + newVisitAsJSON);
-        this.mockMvc.perform(post("/api/owners/1/pets/1/visits")
+        this.mockMvc.perform(post("/api/v1/owners/1/pets/1/visits")
                 .content(newVisitAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isCreated());
     }
@@ -403,7 +403,7 @@ class OwnerRestControllerTests {
         var pet = petMapper.toPet(pets.get(0));
         pet.setOwner(owner);
         given(this.clinicService.findPetById(1)).willReturn(pet);
-        this.mockMvc.perform(get("/api/owners/2/pets/1")
+        this.mockMvc.perform(get("/api/v1/owners/2/pets/1")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"));
@@ -414,7 +414,7 @@ class OwnerRestControllerTests {
     void testGetOwnersPetsWithOwnerNotFound() throws Exception {
         owners.clear();
         given(this.clinicService.findAllOwners()).willReturn(ownerMapper.toOwners(owners));
-        this.mockMvc.perform(get("/api/owners/1/pets/1")
+        this.mockMvc.perform(get("/api/v1/owners/1/pets/1")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
     }
@@ -424,7 +424,7 @@ class OwnerRestControllerTests {
     void testGetOwnersPetsWithPetNotFound() throws Exception {
         var owner1 = ownerMapper.toOwner(owners.get(0));
         given(this.clinicService.findOwnerById(1)).willReturn(owner1);
-        this.mockMvc.perform(get("/api/owners/1/pets/2")
+        this.mockMvc.perform(get("/api/v1/owners/1/pets/2")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
     }
@@ -445,7 +445,7 @@ class OwnerRestControllerTests {
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String updatedPetAsJSON = mapper.writeValueAsString(updatedPetDto);
-        this.mockMvc.perform(put("/api/owners/" + ownerId + "/pets/" + petId)
+        this.mockMvc.perform(put("/api/v1/owners/" + ownerId + "/pets/" + petId)
                 .content(updatedPetAsJSON)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -465,7 +465,7 @@ class OwnerRestControllerTests {
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String updatedPetAsJSON = mapper.writeValueAsString(petDto);
-        this.mockMvc.perform(put("/api/owners/" + ownerId + "/pets/" + petId)
+        this.mockMvc.perform(put("/api/v1/owners/" + ownerId + "/pets/" + petId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(updatedPetAsJSON))
             .andExpect(status().isNotFound());
@@ -486,7 +486,7 @@ class OwnerRestControllerTests {
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String updatedPetAsJSON = mapper.writeValueAsString(petDto);
-        this.mockMvc.perform(put("/api/owners/" + ownerId + "/pets/" + petId)
+        this.mockMvc.perform(put("/api/v1/owners/" + ownerId + "/pets/" + petId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(updatedPetAsJSON))
             .andExpect(status().isNotFound());

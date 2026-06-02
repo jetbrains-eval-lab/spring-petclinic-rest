@@ -5,7 +5,15 @@
   "jvm_version": "21",
   "build_system": "maven",
   "expected": {
-    "fail_to_pass": [],
+    "fail_to_pass": [
+      "org.springframework.samples.petclinic.rest.controller.OwnerRestControllerTests",
+      "org.springframework.samples.petclinic.rest.controller.PetRestControllerTests",
+      "org.springframework.samples.petclinic.rest.controller.PetTypeRestControllerTests",
+      "org.springframework.samples.petclinic.rest.controller.SpecialtyRestControllerTests",
+      "org.springframework.samples.petclinic.rest.controller.UserRestControllerTests",
+      "org.springframework.samples.petclinic.rest.controller.VetRestControllerTests",
+      "org.springframework.samples.petclinic.rest.controller.VisitRestControllerTests"
+    ],
     "pass_to_pass": []
   },
   "environment": {

@@ -107,7 +107,7 @@ class PetRestControllerTests {
     @WithMockUser(roles = "OWNER_ADMIN")
     void testGetPetSuccess() throws Exception {
         given(this.clinicService.findPetById(3)).willReturn(petMapper.toPet(pets.get(0)));
-        this.mockMvc.perform(get("/api/pets/3")
+        this.mockMvc.perform(get("/api/v1/pets/3")
                 .accept(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -119,7 +119,7 @@ class PetRestControllerTests {
     @WithMockUser(roles = "OWNER_ADMIN")
     void testGetPetNotFound() throws Exception {
         given(petMapper.toPetDto(this.clinicService.findPetById(999))).willReturn(null);
-        this.mockMvc.perform(get("/api/pets/999")
+        this.mockMvc.perform(get("/api/v1/pets/999")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
     }
@@ -131,7 +131,7 @@ class PetRestControllerTests {
         System.err.println(pets);
         when(this.clinicService.findAllPets()).thenReturn(pets);
         //given(this.clinicService.findAllPets()).willReturn(petMapper.toPets(pets));
-        this.mockMvc.perform(get("/api/pets")
+        this.mockMvc.perform(get("/api/v1/pets")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -146,7 +146,7 @@ class PetRestControllerTests {
     void testGetAllPetsNotFound() throws Exception {
         pets.clear();
         given(this.clinicService.findAllPets()).willReturn(petMapper.toPets(pets));
-        this.mockMvc.perform(get("/api/pets")
+        this.mockMvc.perform(get("/api/v1/pets")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
     }
@@ -163,12 +163,12 @@ class PetRestControllerTests {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         String newPetAsJSON = mapper.writeValueAsString(newPet);
-        this.mockMvc.perform(put("/api/pets/3")
+        this.mockMvc.perform(put("/api/v1/pets/3")
                 .content(newPetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(content().contentType("application/json"))
             .andExpect(status().isNoContent());
 
-        this.mockMvc.perform(get("/api/pets/3")
+        this.mockMvc.perform(get("/api/v1/pets/3")
                 .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -188,7 +188,7 @@ class PetRestControllerTests {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String newPetAsJSON = mapper.writeValueAsString(newPet);
 
-        this.mockMvc.perform(put("/api/pets/3")
+        this.mockMvc.perform(put("/api/v1/pets/3")
                 .content(newPetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
@@ -201,7 +201,7 @@ class PetRestControllerTests {
         mapper.registerModule(new JavaTimeModule());
         String newPetAsJSON = mapper.writeValueAsString(newPet);
         given(this.clinicService.findPetById(3)).willReturn(petMapper.toPet(pets.get(0)));
-        this.mockMvc.perform(delete("/api/pets/3")
+        this.mockMvc.perform(delete("/api/v1/pets/3")
                 .content(newPetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isNoContent());
     }
@@ -214,7 +214,7 @@ class PetRestControllerTests {
         mapper.registerModule(new JavaTimeModule());
         String newPetAsJSON = mapper.writeValueAsString(newPet);
         given(this.clinicService.findPetById(999)).willReturn(null);
-        this.mockMvc.perform(delete("/api/pets/999")
+        this.mockMvc.perform(delete("/api/v1/pets/999")
                 .content(newPetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isNotFound());
     }

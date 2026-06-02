@@ -37,7 +37,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(exposedHeaders = "errors, content-type")
-@RequestMapping("api")
+@RequestMapping("api/v1")
 public class PetRestController implements PetsApi {
 
     private final ClinicService clinicService;
