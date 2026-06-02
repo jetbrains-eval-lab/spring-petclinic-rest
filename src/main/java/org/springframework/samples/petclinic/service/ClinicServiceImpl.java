@@ -16,6 +16,9 @@
 package org.springframework.samples.petclinic.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.orm.ObjectRetrievalFailureException;
@@ -64,138 +67,230 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "pets", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "pets", cacheManager = "l2CacheManager")
+    })
     public Collection<Pet> findAllPets() throws DataAccessException {
         return petRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"pets", "petById"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"pets", "petById"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void deletePet(Pet pet) throws DataAccessException {
         petRepository.delete(pet);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "visitById", key = "#visitId", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "visitById", key = "#visitId", cacheManager = "l2CacheManager")
+    })
     public Visit findVisitById(int visitId) throws DataAccessException {
         return findEntityById(() -> visitRepository.findById(visitId));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "visits", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "visits", cacheManager = "l2CacheManager")
+    })
     public Collection<Visit> findAllVisits() throws DataAccessException {
         return visitRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"visits", "visitById", "visitsByPetId"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"visits", "visitById", "visitsByPetId"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void deleteVisit(Visit visit) throws DataAccessException {
         visitRepository.delete(visit);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "vetById", key = "#id", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "vetById", key = "#id", cacheManager = "l2CacheManager")
+    })
     public Vet findVetById(int id) throws DataAccessException {
         return findEntityById(() -> vetRepository.findById(id));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "vets", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "vets", cacheManager = "l2CacheManager")
+    })
     public Collection<Vet> findAllVets() throws DataAccessException {
         return vetRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"vets", "vetById"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"vets", "vetById"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void saveVet(Vet vet) throws DataAccessException {
         vetRepository.save(vet);
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"vets", "vetById"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"vets", "vetById"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void deleteVet(Vet vet) throws DataAccessException {
         vetRepository.delete(vet);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "owners", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "owners", cacheManager = "l2CacheManager")
+    })
     public Collection<Owner> findAllOwners() throws DataAccessException {
         return ownerRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"owners", "ownerById", "ownersByLastName"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"owners", "ownerById", "ownersByLastName"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void deleteOwner(Owner owner) throws DataAccessException {
         ownerRepository.delete(owner);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "petTypeById", key = "#petTypeId", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "petTypeById", key = "#petTypeId", cacheManager = "l2CacheManager")
+    })
     public PetType findPetTypeById(int petTypeId) {
         return findEntityById(() -> petTypeRepository.findById(petTypeId));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "petTypes", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "petTypes", cacheManager = "l2CacheManager")
+    })
     public Collection<PetType> findAllPetTypes() throws DataAccessException {
         return petTypeRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"petTypes", "petTypeById"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"petTypes", "petTypeById"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void savePetType(PetType petType) throws DataAccessException {
         petTypeRepository.save(petType);
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"petTypes", "petTypeById"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"petTypes", "petTypeById"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void deletePetType(PetType petType) throws DataAccessException {
         petTypeRepository.delete(petType);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "specialtyById", key = "#specialtyId", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "specialtyById", key = "#specialtyId", cacheManager = "l2CacheManager")
+    })
     public Specialty findSpecialtyById(int specialtyId) {
         return findEntityById(() -> specialtyRepository.findById(specialtyId));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "specialties", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "specialties", cacheManager = "l2CacheManager")
+    })
     public Collection<Specialty> findAllSpecialties() throws DataAccessException {
         return specialtyRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"specialties", "specialtyById", "specialtiesByNameIn"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"specialties", "specialtyById", "specialtiesByNameIn"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void saveSpecialty(Specialty specialty) throws DataAccessException {
         specialtyRepository.save(specialty);
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"specialties", "specialtyById", "specialtiesByNameIn"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"specialties", "specialtyById", "specialtiesByNameIn"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void deleteSpecialty(Specialty specialty) throws DataAccessException {
         specialtyRepository.delete(specialty);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "petTypes", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "petTypes", cacheManager = "l2CacheManager")
+    })
     public Collection<PetType> findPetTypes() throws DataAccessException {
         return petRepository.findPetTypes();
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "ownerById", key = "#id", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "ownerById", key = "#id", cacheManager = "l2CacheManager")
+    })
     public Owner findOwnerById(int id) throws DataAccessException {
         return findEntityById(() -> ownerRepository.findById(id));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "petById", key = "#id", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "petById", key = "#id", cacheManager = "l2CacheManager")
+    })
     public Pet findPetById(int id) throws DataAccessException {
         return findEntityById(() -> petRepository.findById(id));
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"pets", "petById"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"pets", "petById"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void savePet(Pet pet) throws DataAccessException {
         pet.setType(findPetTypeById(pet.getType().getId()));
         petRepository.save(pet);
@@ -203,6 +298,10 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"visits", "visitById", "visitsByPetId"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"visits", "visitById", "visitsByPetId"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void saveVisit(Visit visit) throws DataAccessException {
         visitRepository.save(visit);
 
@@ -210,12 +309,20 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "vets", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "vets", cacheManager = "l2CacheManager")
+    })
     public Collection<Vet> findVets() throws DataAccessException {
         return vetRepository.findAll();
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = {"owners", "ownerById", "ownersByLastName"}, allEntries = true, cacheManager = "l1CacheManager"),
+        @CacheEvict(value = {"owners", "ownerById", "ownersByLastName"}, allEntries = true, cacheManager = "l2CacheManager")
+    })
     public void saveOwner(Owner owner) throws DataAccessException {
         ownerRepository.save(owner);
 
@@ -223,18 +330,30 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "ownersByLastName", key = "#lastName", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "ownersByLastName", key = "#lastName", cacheManager = "l2CacheManager")
+    })
     public Collection<Owner> findOwnerByLastName(String lastName) throws DataAccessException {
         return ownerRepository.findByLastName(lastName);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "visitsByPetId", key = "#petId", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "visitsByPetId", key = "#petId", cacheManager = "l2CacheManager")
+    })
     public Collection<Visit> findVisitsByPetId(int petId) {
         return visitRepository.findByPetId(petId);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "specialtiesByNameIn", key = "#names", cacheManager = "l1CacheManager"),
+        @Cacheable(cacheNames = "specialtiesByNameIn", key = "#names", cacheManager = "l2CacheManager")
+    })
     public List<Specialty> findSpecialtiesByNameIn(Set<String> names) {
         return findEntityById(() -> specialtyRepository.findSpecialtiesByNameIn(names));
     }
