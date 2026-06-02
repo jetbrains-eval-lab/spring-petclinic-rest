@@ -6,7 +6,11 @@
   "build_system": "maven",
   "expected": {
     "fail_to_pass": [
-      "org.springframework.samples.petclinic.rest.advice.ExceptionControllerAdviceTests"
+      "org.springframework.samples.petclinic.rest.advice.ExceptionControllerAdviceTests.testHandleAccessDeniedException",
+      "org.springframework.samples.petclinic.rest.advice.ExceptionControllerAdviceTests.testHandleHttpMessageNotReadableException",
+      "org.springframework.samples.petclinic.rest.advice.ExceptionControllerAdviceTests.testHandleHttpRequestMethodNotSupportedException",
+      "org.springframework.samples.petclinic.rest.advice.ExceptionControllerAdviceTests.testHandleMethodArgumentTypeMismatchException",
+      "org.springframework.samples.petclinic.rest.advice.ExceptionControllerAdviceTests.testHandleNoResourceFoundException"
     ],
     "pass_to_pass": []
   },
