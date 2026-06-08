@@ -6,7 +6,8 @@
   "build_system": "maven",
   "expected": {
     "fail_to_pass": [
-      "SecurityIntegrationTests"
+      "org.springframework.samples.petclinic.rest.controller.SecurityIntegrationTests.ownerCanAccessOwnPet",
+      "org.springframework.samples.petclinic.rest.controller.SecurityIntegrationTests.ownerCanCreateAndUpdateOwnPet"
     ],
     "pass_to_pass": []
   },
