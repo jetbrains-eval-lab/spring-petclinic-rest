@@ -49,7 +49,7 @@ public class PetRestController implements PetsApi {
         this.petMapper = petMapper;
     }
 
-    @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
+    @PreAuthorize("hasRole(@roles.OWNER_ADMIN) or (hasRole(@roles.OWNER) and @ownershipChecker.isPetOwner(authentication, #petId))")
     @Override
     public ResponseEntity<PetDto> getPet(Integer petId) {
         PetDto pet = petMapper.toPetDto(this.clinicService.findPetById(petId));
