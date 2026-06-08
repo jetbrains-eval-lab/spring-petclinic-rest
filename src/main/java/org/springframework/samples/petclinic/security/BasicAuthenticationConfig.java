@@ -21,6 +21,7 @@ import java.util.Map;
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true) // Enable @PreAuthorize method-level security
 @ConditionalOnProperty(name = "petclinic.security.enable", havingValue = "true")
+@ConditionalOnProperty(name = "petclinic.security.oauth2.enable", havingValue = "false", matchIfMissing = true)
 public class BasicAuthenticationConfig {
 
     @Autowired

@@ -38,7 +38,13 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
         try {
             getByUsername(user.getUsername());
-            this.namedParameterJdbcTemplate.update("UPDATE users SET password=:password, enabled=:enabled WHERE username=:username", parameterSource);
+            // Issue 6: also update OAuth2 fields on re-login so data stays current
+            this.namedParameterJdbcTemplate.update(
+                "UPDATE users SET password=:password, enabled=:enabled, " +
+                "email=:email, first_name=:firstName, last_name=:lastName, " +
+                "oauth_id=:oauthId, picture_url=:pictureUrl, oauth_provider=:oauthProvider " +
+                "WHERE username=:username",
+                parameterSource);
         } catch (EmptyResultDataAccessException e) {
             this.insertUser.execute(parameterSource);
         } finally {
@@ -52,6 +58,15 @@ public class JdbcUserRepositoryImpl implements UserRepository {
         params.put("username", username);
         return this.namedParameterJdbcTemplate.queryForObject("SELECT * FROM users WHERE username=:username",
             params, BeanPropertyRowMapper.newInstance(User.class));
+    }
+
+    @Override
+    public User findByUsername(String username) throws DataAccessException {
+        try {
+            return getByUsername(username);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     private void updateUserRoles(User user) {

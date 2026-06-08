@@ -1,5 +1,7 @@
 package org.springframework.samples.petclinic.model;
 
+import java.io.Serializable;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -11,7 +13,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "roles" ,uniqueConstraints = @UniqueConstraint(columnNames = {"username", "role"}))
-public class Role extends BaseEntity {
+public class Role extends BaseEntity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @ManyToOne
     @JoinColumn(name = "username")

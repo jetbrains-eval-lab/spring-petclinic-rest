@@ -48,6 +48,14 @@ API documentation (OAS 3.1) is accessible at: [http://localhost:9966/petclinic/v
 
 | **Method** | **Endpoint** | **Description** |
 |-----------|------------|----------------|
+| **Authentication** |  |  |
+| **GET** | `/api/auth/login` | Return auth status and OAuth2 login URL |
+| **POST** | `/api/auth/logout` | Logout and invalidate session |
+| **Session Management** |  |  |
+| **GET** | `/api/session/user` | Get authenticated user |
+| **GET** | `/api/session/attributes/{key}` | Get specific session attribute |
+| **PUT** | `/api/session/attributes/{key}` | Set/update session attribute |
+| **DELETE** | `/api/session/attributes/{key}` | Remove session attribute |
 | **Owners** |  |  |
 | **GET** | `/api/owners` | Retrieve all pet owners |
 | **GET** | `/api/owners/{ownerId}` | Get a pet owner by ID |
@@ -222,14 +230,118 @@ mvn clean install
 ## Security configuration
 In its default configuration, Petclinic doesn't have authentication and authorization enabled.
 
-### Basic Authentication
+### OAuth2 Social Login (Recommended)
+The application supports Google OAuth2 social login with comprehensive session management. This is the recommended authentication method for modern applications.
+
+#### Enable OAuth2 Authentication
+```properties
+# Enable OAuth2 authentication (disable basic auth)
+petclinic.security.enable=false
+petclinic.security.oauth2.enable=true
+petclinic.security.oauth2.default-login-provider=google
+
+# Google OAuth2 Configuration
+spring.security.oauth2.client.registration.google.client-id=YOUR_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_CLIENT_SECRET
+
+# Admin email configuration with role mapping
+# Format: email1:ROLE1,ROLE2;email2:ROLE3;email3:ROLE1
+petclinic.security.oauth2.admin-emails=admin@petclinic.com:ADMIN,VET_ADMIN,OWNER_ADMIN;manager@petclinic.com:VET_ADMIN,OWNER_ADMIN
+
+# Session timeout for Spring Session
+spring.session.timeout=30m
+```
+
+#### Google OAuth2 Setup
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create OAuth2 credentials
+3. Add authorized redirect URI: `http://localhost:9966/petclinic/login/oauth2/code/google`
+4. Copy client ID and secret to your configuration
+
+#### OAuth2 Authentication Flow
+1. **Login**: `GET /api/auth/login` - Returns OAuth2 login URL
+2. **Logout**: `POST /api/auth/logout` - Invalidate session
+
+#### API Security Contract (Current Behavior)
+- `/api/auth/**` is publicly accessible
+- Protected APIs require authentication
+- Unauthenticated access to protected endpoints may return OAuth2 re-auth redirect (`302 Found`) instead of `401`
+- `GET /api/auth/login` for unauthenticated users returns `200` with:
+  - `authenticated: false`
+  - `loginUrl: /oauth2/authorization/{provider}`
+- Default login provider is configured via:
+  - `petclinic.security.oauth2.default-login-provider=google`
+
+#### Session Management
+The application provides comprehensive session attribute management:
+
+- **User Info**: `GET /api/session/user` - Get authenticated user details
+- **Attributes**: Full CRUD operations on session attributes
+  - `GET /api/session/attributes/{key}` - Get specific attribute
+  - `PUT /api/session/attributes/{key}` - Set/update attribute
+  - `DELETE /api/session/attributes/{key}` - Remove attribute
+
+#### Role Assignment
+- **Regular Users**: No roles by default (principle of least privilege)
+- **Admin Users**: Users with emails in `petclinic.security.oauth2.admin-emails` receive roles as configured:
+  - Configurable per email using format: `email1:ROLE1,ROLE2;email2:ROLE3`
+  - Example: `admin@petclinic.com:ADMIN,VET_ADMIN,OWNER_ADMIN`
+
+#### Session Attributes
+The system supports comprehensive user-defined session attributes including:
+- **theme**: UI theme preference (e.g., "dark", "light")
+- **language**: User language preference (e.g., "en-US", "es-ES")
+- **timezone**: User timezone setting (e.g., "America/New_York", "Europe/Madrid")
+- **notifications**: Notification preferences (e.g., "enabled", "disabled")
+- **customData**: Any custom user preferences as JSON objects
+
+All session data is persisted using Spring Session JDBC for scalability and reliability.
+
+#### Additional OAuth2 Providers
+To add support for additional OAuth2 providers (GitHub, Facebook, etc.), add their configuration:
+
+```properties
+# GitHub OAuth2 Provider
+spring.security.oauth2.client.registration.github.client-id=YOUR_GITHUB_CLIENT_ID
+spring.security.oauth2.client.registration.github.client-secret=YOUR_GITHUB_CLIENT_SECRET
+
+# Facebook OAuth2 Provider
+spring.security.oauth2.client.registration.facebook.client-id=YOUR_FACEBOOK_CLIENT_ID
+spring.security.oauth2.client.registration.facebook.client-secret=YOUR_FACEBOOK_CLIENT_SECRET
+```
+
+The system automatically detects and supports multiple OAuth2 providers. User roles are assigned based on email regardless of the authentication provider.
+
+#### Distributed Session Storage
+For production environments with multiple application instances, configure distributed session storage:
+
+**Redis Configuration:**
+```properties
+# Redis session storage
+spring.session.store-type=redis
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+spring.data.redis.password=your_redis_password
+```
+
+**JDBC Configuration (Current Default):**
+```properties
+# JDBC session storage (already configured)
+spring.session.store-type=jdbc
+spring.session.jdbc.initialize-schema=always
+```
+
+For detailed OAuth2 and session management documentation, see [OAUTH2_SESSION_DOCUMENTATION.md](./OAUTH2_SESSION_DOCUMENTATION.md).
+
+### Basic Authentication (Legacy)
 In order to use the basic authentication functionality, turn in on from the `application.properties` file
 ```properties
 petclinic.security.enable=true
+petclinic.security.oauth2.enable=false
 ```
 This will secure all APIs and in order to access them, basic authentication is required.
 Apart from authentication, APIs also require authorization. This is done via roles that a user can have.
-The existing roles are listed below with the corresponding permissions 
+The existing roles are listed below with the corresponding permissions
 
 * `OWNER_ADMIN` -> `OwnerController`, `PetController`, `PetTypeController` (`getAllPetTypes` and `getPetType`), `VisitController`
 * `VET_ADMIN`   -> `PetTypeController`, `SpecialityController`, `VetController`
