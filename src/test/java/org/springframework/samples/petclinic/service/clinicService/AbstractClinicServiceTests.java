@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.samples.petclinic.model.*;
 import org.springframework.samples.petclinic.service.ClinicService;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.samples.petclinic.util.EntityUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
@@ -233,8 +234,60 @@ abstract class AbstractClinicServiceTests {
             pet = this.clinicService.findPetById(1);
 		} catch (Exception e) {
 			pet = null;
-		}
+        }
         assertThat(pet).isNull();
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void shouldEvictOwnerCacheWhenDeletingPet() {
+        Owner owner = this.clinicService.findOwnerById(3);
+        assertThat(owner.getPets()).extracting(Pet::getId).containsExactlyInAnyOrder(3, 4);
+
+        Pet pet = this.clinicService.findPetById(3);
+        this.clinicService.deletePet(pet);
+
+        owner = this.clinicService.findOwnerById(3);
+        assertThat(owner).isNotNull();
+        assertThat(owner.getPets()).extracting(Pet::getId).containsExactly(4);
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void shouldEvictOwnerListCacheWhenDeletingPet() {
+        Collection<Owner> owners = this.clinicService.findAllOwners();
+        Owner owner = EntityUtils.getById(owners, Owner.class, 3);
+        assertThat(owner).isNotNull();
+        assertThat(owner.getPets()).extracting(Pet::getId).containsExactlyInAnyOrder(3, 4);
+
+        Pet pet = this.clinicService.findPetById(3);
+        this.clinicService.deletePet(pet);
+
+        owners = this.clinicService.findAllOwners();
+        owner = EntityUtils.getById(owners, Owner.class, 3);
+        assertThat(owner).isNotNull();
+        assertThat(owner.getPets()).extracting(Pet::getId).containsExactly(4);
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void shouldEvictOwnerSearchCacheWhenDeletingPet() {
+        Collection<Owner> owners = this.clinicService.findOwnerByLastName("Rod");
+        assertThat(owners).hasSize(1);
+
+        Owner owner = owners.iterator().next();
+        assertThat(owner.getId()).isEqualTo(3);
+        assertThat(owner.getPets()).extracting(Pet::getId).containsExactlyInAnyOrder(3, 4);
+
+        Pet pet = this.clinicService.findPetById(3);
+        this.clinicService.deletePet(pet);
+
+        owners = this.clinicService.findOwnerByLastName("Rod");
+        assertThat(owners).hasSize(1);
+
+        owner = owners.iterator().next();
+        assertThat(owner.getId()).isEqualTo(3);
+        assertThat(owner.getPets()).extracting(Pet::getId).containsExactly(4);
     }
 
     @Test
@@ -291,12 +344,28 @@ abstract class AbstractClinicServiceTests {
     void shouldDeleteVisit(){
     	Visit visit = this.clinicService.findVisitById(1);
         this.clinicService.deleteVisit(visit);
+        clearCache();
         try {
         	visit = this.clinicService.findVisitById(1);
 		} catch (Exception e) {
 			visit = null;
 		}
         assertThat(visit).isNull();
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void shouldEvictPetCacheWhenDeletingVisit() {
+        Pet pet = this.clinicService.findPetById(7);
+        assertThat(pet.getVisits()).hasSize(2);
+
+        Visit visit = this.clinicService.findVisitById(1);
+        this.clinicService.deleteVisit(visit);
+
+        pet = this.clinicService.findPetById(7);
+        assertThat(pet).isNotNull();
+        assertThat(pet.getVisits()).hasSize(1);
+        assertThat(pet.getVisits()).noneMatch(existingVisit -> existingVisit.getId().equals(1));
     }
 
     @Test
