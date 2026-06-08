@@ -6,10 +6,19 @@
   "build_system": "maven",
   "expected": {
     "fail_to_pass": [
-      "AbstractClinicServiceTests#shouldEvictOwnerCacheWhenDeletingPet",
-      "AbstractClinicServiceTests#shouldEvictOwnerListCacheWhenDeletingPet",
-      "AbstractClinicServiceTests#shouldEvictOwnerSearchCacheWhenDeletingPet",
-      "AbstractClinicServiceTests#shouldEvictPetCacheWhenDeletingVisit"
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceJdbcTests.shouldEvictOwnerCacheWhenDeletingPet",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceJdbcTests.shouldEvictOwnerListCacheWhenDeletingPet",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceJdbcTests.shouldEvictOwnerSearchCacheWhenDeletingPet",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceJdbcTests.shouldEvictPetCacheWhenDeletingVisit",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceJpaTests.shouldDeleteVisit",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceJpaTests.shouldEvictOwnerCacheWhenDeletingPet",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceJpaTests.shouldEvictOwnerListCacheWhenDeletingPet",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceJpaTests.shouldEvictOwnerSearchCacheWhenDeletingPet",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceJpaTests.shouldEvictPetCacheWhenDeletingVisit",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceSpringDataJpaTests.shouldEvictOwnerCacheWhenDeletingPet",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceSpringDataJpaTests.shouldEvictOwnerListCacheWhenDeletingPet",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceSpringDataJpaTests.shouldEvictOwnerSearchCacheWhenDeletingPet",
+      "org.springframework.samples.petclinic.service.clinicService.ClinicServiceSpringDataJpaTests.shouldEvictPetCacheWhenDeletingVisit"
     ],
     "pass_to_pass": []
   },
