@@ -6,12 +6,12 @@
   "build_system": "maven",
   "expected": {
     "fail_to_pass": [
-      "org.springframework.samples.petclinic.service.clinicService.N1SelectOptimizationTest",
       "org.springframework.samples.petclinic.rest.controller.OwnerRestControllerSpringDataJpaN1IntegrationTests",
       "org.springframework.samples.petclinic.rest.controller.OwnerRestControllerJpaN1IntegrationTests",
-      "org.springframework.samples.petclinic.rest.controller.VetRestControllerJpaN1IntegrationTests",
       "org.springframework.samples.petclinic.rest.controller.PetRestControllerN1IntegrationTests",
-      "org.springframework.samples.petclinic.rest.controller.PetRestControllerJpaN1IntegrationTests"
+      "org.springframework.samples.petclinic.rest.controller.PetRestControllerJpaN1IntegrationTests",
+      "org.springframework.samples.petclinic.service.clinicService.N1SelectOptimizationTest.findAllOwners_shouldNotTriggerNPlusOneForPets",
+      "org.springframework.samples.petclinic.rest.controller.VetRestControllerJpaN1IntegrationTests.listVets_shouldFetchAllAssociationsInSingleQuery"
     ],
     "pass_to_pass": []
   },
