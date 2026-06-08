@@ -4,14 +4,14 @@ CREATE TABLE IF NOT EXISTS vets (
   last_name VARCHAR(30) NOT NULL
 );
 
-CREATE INDEX idx_vets_last_name ON vets(last_name);
+CREATE INDEX IF NOT EXISTS idx_vets_last_name ON vets(last_name);
 
 CREATE TABLE IF NOT EXISTS specialties (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   name VARCHAR(80) NOT NULL
 );
 
-CREATE INDEX idx_specialties_name ON specialties(name);
+CREATE INDEX IF NOT EXISTS idx_specialties_name ON specialties(name);
 
 CREATE TABLE IF NOT EXISTS vet_specialties (
   vet_id INTEGER NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS types (
   name VARCHAR(80) NOT NULL
 );
 
-CREATE INDEX idx_types_name ON types(name);
+CREATE INDEX IF NOT EXISTS idx_types_name ON types(name);
 
 CREATE TABLE IF NOT EXISTS owners (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS owners (
   telephone VARCHAR(20) NOT NULL
 );
 
-CREATE INDEX idx_owners_last_name ON owners(last_name);
+CREATE INDEX IF NOT EXISTS idx_owners_last_name ON owners(last_name);
 
 CREATE TABLE IF NOT EXISTS pets (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS pets (
   FOREIGN KEY (type_id) REFERENCES types(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_pets_name ON pets(name);
+CREATE INDEX IF NOT EXISTS idx_pets_name ON pets(name);
 
 CREATE TABLE IF NOT EXISTS visits (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -72,3 +72,21 @@ CREATE TABLE IF NOT EXISTS roles (
   UNIQUE (role, username),
   FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS api_keys (
+  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  key_hash VARCHAR(255) NOT NULL,
+  key_prefix VARCHAR(20) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  created_by VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  expires_at TIMESTAMP,
+  last_used_at TIMESTAMP,
+  revoked_at TIMESTAMP,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  FOREIGN KEY (created_by) REFERENCES users(username) ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_api_keys_key_hash ON api_keys(key_hash);
+CREATE INDEX IF NOT EXISTS idx_api_keys_key_prefix ON api_keys(key_prefix);
+CREATE INDEX IF NOT EXISTS idx_api_keys_is_active_revoked ON api_keys(is_active, revoked_at);

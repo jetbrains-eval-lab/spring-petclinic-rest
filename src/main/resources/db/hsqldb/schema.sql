@@ -1,3 +1,4 @@
+DROP TABLE api_keys IF EXISTS;
 DROP TABLE vet_specialties IF EXISTS;
 DROP TABLE vets IF EXISTS;
 DROP TABLE specialties IF EXISTS;
@@ -79,4 +80,21 @@ CREATE TABLE roles (
 );
 ALTER TABLE roles ADD CONSTRAINT fk_username FOREIGN KEY (username) REFERENCES users (username);
 CREATE INDEX fk_username_idx ON roles (username);
+
+CREATE TABLE api_keys (
+  id INTEGER IDENTITY PRIMARY KEY,
+  key_hash VARCHAR(255) NOT NULL,
+  key_prefix VARCHAR(20) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  created_by VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  expires_at TIMESTAMP,
+  last_used_at TIMESTAMP,
+  revoked_at TIMESTAMP,
+  is_active BOOLEAN DEFAULT TRUE NOT NULL
+);
+ALTER TABLE api_keys ADD CONSTRAINT fk_api_keys_created_by FOREIGN KEY (created_by) REFERENCES users(username);
+CREATE UNIQUE INDEX idx_api_keys_key_hash ON api_keys(key_hash);
+CREATE INDEX idx_api_keys_key_prefix ON api_keys(key_prefix);
+CREATE INDEX idx_api_keys_is_active_revoked ON api_keys(is_active, revoked_at);
 

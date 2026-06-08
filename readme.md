@@ -43,6 +43,59 @@ Swagger UI is available at: [http://localhost:9966/petclinic/swagger-ui.html](ht
 
 API documentation (OAS 3.1) is accessible at: [http://localhost:9966/petclinic/v3/api-docs](http://localhost:9966/petclinic/v3/api-docs).
 
+## API Key Authentication
+Petclinic supports API key authentication for machine-to-machine access. API keys work alongside Basic Authentication. Use API keys for non-admin `/api/*` endpoints; admin endpoints (`/api/admin/*` and `/api/users`) remain Basic Auth only.
+
+### Quick Start
+1. Enable security and API keys (enabled by default when security is enabled):
+```properties
+petclinic.security.enable=true
+petclinic.apikey.enabled=true
+```
+
+2. Create an API key (requires `ROLE_ADMIN`):
+```bash
+curl -X POST http://localhost:9966/petclinic/api/admin/apikeys \
+  -H "Authorization: Basic YWRtaW46YWRtaW4=" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "My API Key"}'
+```
+
+Response includes the full API key only once (store it securely):
+```json
+{
+  "id": 1,
+  "key": "7af1a2b3c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcd",
+  "keyPrefix": "7af1a2b3",
+  "name": "My API Key",
+  "createdAt": "2026-02-10T14:20:00",
+  "expiresAt": null,
+  "createdBy": "admin"
+}
+```
+
+3. Use the API key in requests:
+```bash
+curl -X GET http://localhost:9966/petclinic/api/owners \
+  -H "X-API-Key: 7af1a2b3c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcd"
+```
+
+### Management Endpoints
+All endpoints below require `ROLE_ADMIN`:
+- `POST /api/admin/apikeys` Create a new API key.
+- `POST /api/admin/apikeys/{id}/rotate` Rotate an API key.
+- `POST /api/admin/apikeys/{id}/revoke` Revoke an API key.
+
+### Notes
+- API keys are stored as BCrypt hashes and never in plaintext.
+- Full keys are returned only on create and rotate.
+- Suspicious activity returns HTTP 429 with header `X-Suspicious-Activity: true`.
+- `expiresAt` uses ISO-8601 local date-time without timezone, for example `2026-12-31T23:59:59`.
+
+### Documentation
+See the full API documentation in Swagger UI and OpenAPI:
+- Swagger UI: [http://localhost:9966/petclinic/swagger-ui.html](http://localhost:9966/petclinic/swagger-ui.html)
+- OpenAPI spec: [src/main/resources/openapi.yml](./src/main/resources/openapi.yml)
 
 ## 📌 API Endpoints Overview
 
