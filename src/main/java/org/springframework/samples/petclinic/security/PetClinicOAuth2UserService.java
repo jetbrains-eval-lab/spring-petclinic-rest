@@ -11,6 +11,7 @@ import org.springframework.samples.petclinic.repository.UserRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +36,17 @@ public class PetClinicOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String provider = userRequest.getClientRegistration().getRegistrationId();
-        processOAuth2User(oAuth2User.getAttributes(), provider);
-        return oAuth2User;
+        User user = processOAuth2User(oAuth2User.getAttributes(), provider);
+        
+        return new DefaultOAuth2User(
+            userMapper.mapToAuthorities(user.getRoles()), 
+            oAuth2User.getAttributes(), 
+            userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName()
+        );
     }
-
-    public void processOAuth2User(Map<String, Object> attributes, String provider) {
+    
+    @Transactional
+    public User processOAuth2User(Map<String, Object> attributes, String provider) {
         User user = userMapper.mapToUser(attributes, provider);
         Optional<User> existing = userRepository.findByUsername(user.getUsername());
         if (existing.isPresent()) {
@@ -51,9 +58,11 @@ public class PetClinicOAuth2UserService extends DefaultOAuth2UserService {
             existingUser.setOauthId(user.getOauthId());
             existingUser.setOauthProvider(user.getOauthProvider());
             userRepository.save(existingUser);
+            return existingUser;
         } else {
             assignRoles(user);
             userRepository.save(user);
+            return user;
         }
     }
 

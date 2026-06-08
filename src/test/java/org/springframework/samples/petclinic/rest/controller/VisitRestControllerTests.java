@@ -251,4 +251,12 @@ class VisitRestControllerTests {
         	.andExpect(status().isNotFound());
     }
 
+    @Test
+    @WithMockUser(roles="USER")
+    void testGetVisitForbiddenForNonAdmin() throws Exception {
+    	this.mockMvc.perform(get("/api/visits/1")
+    		.accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
 }
