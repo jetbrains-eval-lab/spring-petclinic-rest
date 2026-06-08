@@ -383,6 +383,14 @@ class OwnerRestControllerTests {
     @Test
     @WithMockUser(roles = "OWNER_ADMIN")
     void testCreateVisitSuccess() throws Exception {
+        // Controller validates that pet belongs to owner via owner.getPet()
+        // Must add pet to owner for the lookup to succeed
+        var owner = ownerMapper.toOwner(owners.get(0));
+        var pet = petMapper.toPet(pets.get(0));
+        pet.setId(1);
+        owner.addPet(pet);
+        given(this.clinicService.findOwnerById(1)).willReturn(owner);
+
         VisitDto newVisit = visits.get(0);
         newVisit.setId(999);
         ObjectMapper mapper = new ObjectMapper();
@@ -398,11 +406,12 @@ class OwnerRestControllerTests {
     @Test
     @WithMockUser(roles = "OWNER_ADMIN")
     void testGetOwnerPetSuccess() throws Exception {
+        // Controller validates that pet belongs to owner via owner.getPet()
         var owner = ownerMapper.toOwner(owners.get(0));
-        given(this.clinicService.findOwnerById(2)).willReturn(owner);
         var pet = petMapper.toPet(pets.get(0));
-        pet.setOwner(owner);
-        given(this.clinicService.findPetById(1)).willReturn(pet);
+        pet.setId(1);
+        owner.addPet(pet);
+        given(this.clinicService.findOwnerById(2)).willReturn(owner);
         this.mockMvc.perform(get("/api/owners/2/pets/1")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -435,8 +444,11 @@ class OwnerRestControllerTests {
     void testUpdateOwnersPetSuccess() throws Exception {
         int ownerId = owners.get(0).getId();
         int petId = pets.get(0).getId();
-        given(this.clinicService.findOwnerById(ownerId)).willReturn(ownerMapper.toOwner(owners.get(0)));
-        given(this.clinicService.findPetById(petId)).willReturn(petMapper.toPet(pets.get(0)));
+        // Controller validates that pet belongs to owner via owner.getPet()
+        var owner = ownerMapper.toOwner(owners.get(0));
+        var pet = petMapper.toPet(pets.get(0));
+        owner.addPet(pet);
+        given(this.clinicService.findOwnerById(ownerId)).willReturn(owner);
         PetDto updatedPetDto = pets.get(0);
         updatedPetDto.setName("Rex");
         updatedPetDto.setBirthDate(LocalDate.of(2020, 1, 15));
@@ -476,8 +488,8 @@ class OwnerRestControllerTests {
     void testUpdateOwnersPetPetNotFound() throws Exception {
         int ownerId = owners.get(0).getId();
         int petId = 0;
+        // Owner has no pets, so owner.getPet(0) returns null -> 404
         given(this.clinicService.findOwnerById(ownerId)).willReturn(ownerMapper.toOwner(owners.get(0)));
-        given(this.clinicService.findPetById(petId)).willReturn(null);
         PetDto petDto = pets.get(0);
         petDto.setName("Ghost");
         petDto.setBirthDate(LocalDate.of(2020, 1, 1));

@@ -63,7 +63,7 @@ public class VetRestController implements VetsApi {
         return new ResponseEntity<>(vets, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole(@roles.VET_ADMIN)")
+    @PreAuthorize("hasRole(@roles.VET_ADMIN) or @vetAuthz.isVet(#vetId, authentication)")
     @Override
     public ResponseEntity<VetDto> getVet(Integer vetId)  {
         Vet vet = this.clinicService.findVetById(vetId);
@@ -87,7 +87,7 @@ public class VetRestController implements VetsApi {
         return new ResponseEntity<>(vetMapper.toVetDto(vet), headers, HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasRole(@roles.VET_ADMIN)")
+    @PreAuthorize("hasRole(@roles.VET_ADMIN) or @vetAuthz.isVet(#vetId, authentication)")
     @Override
     public ResponseEntity<VetDto> updateVet(Integer vetId,VetDto vetDto)  {
         Vet currentVet = this.clinicService.findVetById(vetId);

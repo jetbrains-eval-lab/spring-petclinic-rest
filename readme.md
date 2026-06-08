@@ -229,14 +229,69 @@ petclinic.security.enable=true
 ```
 This will secure all APIs and in order to access them, basic authentication is required.
 Apart from authentication, APIs also require authorization. This is done via roles that a user can have.
-The existing roles are listed below with the corresponding permissions 
 
-* `OWNER_ADMIN` -> `OwnerController`, `PetController`, `PetTypeController` (`getAllPetTypes` and `getPetType`), `VisitController`
-* `VET_ADMIN`   -> `PetTypeController`, `SpecialityController`, `VetController`
-* `ADMIN`       -> `UserController`
+### Role Hierarchy
+
+The application implements a hierarchical role system where higher-level roles inherit permissions from lower-level roles:
+
+```
+              ROLE_ADMIN
+             /          \
+    ROLE_VET_ADMIN    ROLE_OWNER_ADMIN
+          |                  |
+       ROLE_VET          ROLE_OWNER
+          \                  /
+               ROLE_USER
+```
+
+| Role | Description |
+|------|-------------|
+| `ROLE_USER` | Base role. Read-only access to pet types. |
+| `ROLE_OWNER` | Pet owner. Can manage **only their own** profile, pets, and visits. |
+| `ROLE_OWNER_ADMIN` | Admin for owners. Can manage **all** owners, pets, visits. |
+| `ROLE_VET` | Veterinarian. Can view/edit **only their own** vet profile. |
+| `ROLE_VET_ADMIN` | Admin for vets. Can manage **all** vets, specialties, pet types. |
+| `ROLE_ADMIN` | Super admin. Can manage users. Full system access via hierarchy. |
+
+### Authorization Rules
+
+| Resource | Read (list/get) | Create/Update/Delete |
+|----------|-----------------|----------------------|
+| Users | `ROLE_ADMIN` | `ROLE_ADMIN` |
+| Vets | `ROLE_VET_ADMIN` (list), `ROLE_VET` (own profile) | `ROLE_VET_ADMIN` |
+| Specialties | `ROLE_VET_ADMIN` | `ROLE_VET_ADMIN` |
+| Pet Types | `ROLE_USER` | `ROLE_VET_ADMIN` |
+| Owners | `ROLE_OWNER_ADMIN` (list), `ROLE_OWNER` (own profile) | `ROLE_OWNER_ADMIN` |
+| Pets | `ROLE_OWNER_ADMIN` (list), `ROLE_OWNER` (own pets) | `ROLE_OWNER_ADMIN` |
+| Visits | `ROLE_OWNER_ADMIN` (list), `ROLE_OWNER` (own visits) | `ROLE_OWNER_ADMIN` |
+
+### Dynamic Ownership
+
+Users with `ROLE_VET` or `ROLE_OWNER` can only access their own resources. Ownership is determined by linking `Vet`/`Owner` entities to `User` via a `username` field in the database.
+
+### Access Denial Logging
+
+All access denials are logged for auditing and compliance. Each denial log entry includes:
+- The marker `SECURITY_ACCESS_DENIED`
+- The principal name (or `anonymous` if unauthenticated)
+
+### Default Users
 
 There is an existing user with the username `admin` and password `admin` that has access to all APIs.
- In order to add a new user, please make `POST /api/users` request with the following payload:
+
+Test users are also available:
+| Username | Password | Role |
+|----------|----------|------|
+| `admin` | `admin` | `ROLE_ADMIN`, `ROLE_VET_ADMIN`, `ROLE_OWNER_ADMIN` |
+| `owner1` | `password` | `ROLE_OWNER` (linked to Owner id=1) |
+| `owner2` | `password` | `ROLE_OWNER` (linked to Owner id=2) |
+| `vet1` | `password` | `ROLE_VET` (linked to Vet id=1) |
+| `vet2` | `password` | `ROLE_VET` (linked to Vet id=2) |
+| `user1` | `password` | `ROLE_USER` |
+
+### Adding New Users
+
+In order to add a new user, please make `POST /api/users` request with the following payload:
 
 ```json
 {

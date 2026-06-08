@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS vets (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   first_name VARCHAR(30) NOT NULL,
-  last_name VARCHAR(30) NOT NULL
+  last_name VARCHAR(30) NOT NULL,
+  username VARCHAR(20)
 );
 
 CREATE INDEX idx_vets_last_name ON vets(last_name);
@@ -34,7 +35,8 @@ CREATE TABLE IF NOT EXISTS owners (
   last_name VARCHAR(30) NOT NULL,
   address VARCHAR(255) NOT NULL,
   city VARCHAR(80) NOT NULL,
-  telephone VARCHAR(20) NOT NULL
+  telephone VARCHAR(20) NOT NULL,
+  username VARCHAR(20)
 );
 
 CREATE INDEX idx_owners_last_name ON owners(last_name);
@@ -58,7 +60,6 @@ CREATE TABLE IF NOT EXISTS visits (
   description VARCHAR(255) NOT NULL,
   FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
 );
-
 CREATE TABLE IF NOT EXISTS users (
   username VARCHAR(20) NOT NULL PRIMARY KEY,
   password VARCHAR(255) NOT NULL,

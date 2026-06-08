@@ -1,3 +1,4 @@
+-- Test schema with username columns for security tests
 DROP TABLE vet_specialties IF EXISTS;
 DROP TABLE vets IF EXISTS;
 DROP TABLE specialties IF EXISTS;
@@ -8,12 +9,26 @@ DROP TABLE owners IF EXISTS;
 DROP TABLE roles IF EXISTS;
 DROP TABLE users IF EXISTS;
 
+CREATE TABLE users (
+  username    VARCHAR(20) NOT NULL PRIMARY KEY,
+  password    VARCHAR(60) NOT NULL,
+  enabled     BOOLEAN DEFAULT TRUE NOT NULL
+);
+
+CREATE TABLE roles (
+  id              INTEGER IDENTITY PRIMARY KEY,
+  username        VARCHAR(20) NOT NULL,
+  role            VARCHAR(20) NOT NULL,
+  FOREIGN KEY (username) REFERENCES users (username)
+);
+CREATE INDEX fk_username_idx ON roles (username);
 
 CREATE TABLE vets (
   id         INTEGER IDENTITY PRIMARY KEY,
   first_name VARCHAR(30),
   last_name  VARCHAR(30),
-  username   VARCHAR(20)
+  username   VARCHAR(20),
+  FOREIGN KEY (username) REFERENCES users (username)
 );
 CREATE INDEX vets_last_name ON vets (last_name);
 
@@ -43,7 +58,8 @@ CREATE TABLE owners (
   address    VARCHAR(255),
   city       VARCHAR(80),
   telephone  VARCHAR(20),
-  username   VARCHAR(20)
+  username   VARCHAR(20),
+  FOREIGN KEY (username) REFERENCES users (username)
 );
 CREATE INDEX owners_last_name ON owners (last_name);
 
@@ -66,19 +82,4 @@ CREATE TABLE visits (
 );
 ALTER TABLE visits ADD CONSTRAINT fk_visits_pets FOREIGN KEY (pet_id) REFERENCES pets (id);
 CREATE INDEX visits_pet_id ON visits (pet_id);
-CREATE  TABLE users (
-  username    VARCHAR(20) NOT NULL ,
-  password    VARCHAR(60) NOT NULL ,
-  enabled     BOOLEAN DEFAULT TRUE NOT NULL ,
-  PRIMARY KEY (username)
-);
-
-CREATE TABLE roles (
-  id              INTEGER IDENTITY PRIMARY KEY,
-  username        VARCHAR(20) NOT NULL,
-  role            VARCHAR(20) NOT NULL
-);
-ALTER TABLE roles ADD CONSTRAINT fk_username FOREIGN KEY (username) REFERENCES users (username);
-CREATE INDEX fk_username_idx ON roles (username);
-
 

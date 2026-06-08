@@ -35,10 +35,21 @@ import java.util.*;
 @Table(name = "vets")
 public class Vet extends Person {
 
+    @Column(name = "username")
+    private String username;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
         inverseJoinColumns = @JoinColumn(name = "specialty_id"))
     private Set<Specialty> specialties;
+
+    public String getUsername() {
+        return this.username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     @JsonIgnore
     protected Set<Specialty> getSpecialtiesInternal() {
