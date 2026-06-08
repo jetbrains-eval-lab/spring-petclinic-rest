@@ -25,12 +25,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <p>Optimizations applied:
  * <ul>
- *   <li>{@code @BatchSize(size = 10)} on {@code Owner.pets}, {@code Pet.visits}, and
- *       {@code Vet.specialties} - Hibernate batches secondary selects into groups of 10,
- *       reducing N queries to ceil(N/10) queries.</li>
- *   <li>Explicit JPQL {@code left join fetch} in {@code findAll()} queries for Owner and Vet
- *       repositories - loads associations in a single SQL JOIN, eliminating secondary selects
- *       entirely for these operations.</li>
+ *   <li>Owner and vet repository list queries use explicit JPQL {@code left join fetch}
+ *       so the associations needed by those list operations are loaded in the primary query.</li>
+ *   <li>Pet list queries now fetch only the associations required by the REST payload
+ *       ({@code owner}, {@code type}, {@code visits}) instead of traversing {@code owner.pets}.</li>
  * </ul>
  */
 @SpringBootTest
@@ -76,9 +74,9 @@ class N1SelectOptimizationTest {
         // With join fetch, query count should be 1 (single JOIN query)
         // We allow a small buffer for framework overhead queries
         assertThat(queryCount)
-            .as("Expected at most 2 queries for findAllOwners (join fetch eliminates N+1), "
+            .as("all entities are fetched in a single join fetch query, "
                 + "but got %d queries for %d owners", queryCount, ownerCount)
-            .isLessThanOrEqualTo(2);
+            .isEqualTo(1);
     }
 
     /**
@@ -104,9 +102,9 @@ class N1SelectOptimizationTest {
         // With N+1, query count would be: 1 (vets) + N (specialties per vet) = vetCount + 1
         // With join fetch, query count should be 1 (single JOIN query)
         assertThat(queryCount)
-            .as("Expected at most 2 queries for findAllVets (join fetch eliminates N+1), "
+            .as("all entities are fetched in a single join fetch query, "
                 + "but got %d queries for %d vets", queryCount, vetCount)
-            .isLessThanOrEqualTo(2);
+            .isEqualTo(1);
     }
 
     /**

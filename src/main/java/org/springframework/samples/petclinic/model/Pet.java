@@ -19,8 +19,6 @@ import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import org.hibernate.annotations.BatchSize;
-
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
@@ -48,8 +46,7 @@ public class Pet extends NamedEntity {
     @JoinColumn(name = "owner_id")
     private Owner owner;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet", fetch = FetchType.EAGER)
-    @BatchSize(size = 25)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet", fetch = FetchType.LAZY)
     private Set<Visit> visits;
 
     public LocalDate getBirthDate() {
